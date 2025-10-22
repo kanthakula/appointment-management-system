@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SlotSure - Appointment Booking</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; padding: 0 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 2px solid #333; margin-bottom: 20px; }
+    .slot { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    .slot h3 { margin: 0 0 10px 0; }
+    .reserve-btn { background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; display: inline-block; }
+    .reserve-btn:hover { background: #218838; }
+    .full { background: #ccc; color: #666; padding: 8px 16px; display: inline-block; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SlotSure - Appointment Booking</h1>
+    <a href="/login" style="padding: 8px 16px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">Admin Login</a>
+  </header>
+
+  <h2>Available Time Slots</h2>
+  <p><strong>For Devotees:</strong> Click "Reserve" to book your appointment slot. You can reserve for up to 5 people per booking.</p>
+
+  <% if (slots.length === 0) { %>
+    <p>No slots available at this time. Please check back later.</p>
+  <% } else { %>
+    <% slots.forEach(function(s){ %>
+      <div class="slot">
+        <h3><%= new Date(s.date).toLocaleDateString() %> at <%= s.start %><% if(s.end) { %> - <%= s.end %><% } %></h3>
+        <p>Available seats: <strong><%= s.remaining ?? s.capacity %></strong> out of <%= s.capacity %></p>
+        <% if (s.remaining > 0) { %>
+          <a href="/register/<%= s.id %>" class="reserve-btn">Reserve Slot</a>
+        <% } else { %>
+          <span class="full">Full / Unavailable</span>
+        <% } %>
+      </div>
+    <% }) %>
+  <% } %>
+</body>
+</html>
