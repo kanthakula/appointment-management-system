@@ -134,18 +134,28 @@ const Header = () => {
     }
   }
 
-  const handleLogout = () => {
-    console.log('Logout button clicked')
+  const handleLogout = (e) => {
+    console.log('=== LOGOUT BUTTON CLICKED ===')
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     setShowProfileMenu(false)
-    // Use the working logout URL directly
-    window.location.href = '/logout'
+    console.log('Redirecting to /logout...')
+    // Use window.location.replace to prevent back button
+    window.location.replace('/logout')
   }
 
-  const handleEmergencyLogout = () => {
-    console.log('Emergency logout triggered')
+  const handleEmergencyLogout = (e) => {
+    console.log('=== EMERGENCY LOGOUT BUTTON CLICKED ===')
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     setShowProfileMenu(false)
-    // Use the working logout URL directly
-    window.location.href = '/logout'
+    console.log('Redirecting to /logout...')
+    // Use window.location.replace to prevent back button
+    window.location.replace('/logout')
   }
 
   // Close menu when clicking outside
@@ -255,23 +265,57 @@ const Header = () => {
                     {user?.email}
                   </div>
                   <div style={{ borderTop: '1px solid #eee', margin: '0.5rem 0' }}></div>
-                  <label style={profileMenuItemStyles} onClick={() => setShowProfileUpload(true)}>
+                  <label 
+                    style={profileMenuItemStyles}
+                    onMouseDown={(e) => {
+                      console.log('Change Profile Picture onMouseDown fired!')
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }}
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                    }}
+                  >
                     📷 Change Profile Picture
                     <input
                       type="file"
                       accept="image/*"
                       style={{ display: 'none' }}
-                      onChange={handleProfilePictureUpload}
+                      onChange={(e) => {
+                        console.log('File input onChange fired!')
+                        e.stopPropagation();
+                        handleProfilePictureUpload(e);
+                      }}
                     />
                   </label>
                   <button 
-                    onClick={handleLogout}
+                    onMouseDown={(e) => {
+                      console.log('Logout button onMouseDown fired!')
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleLogout(e)
+                    }}
+                    onClick={(e) => {
+                      console.log('Logout button onClick fired!')
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }}
                     style={{ ...profileMenuItemStyles, width: '100%', textAlign: 'left', border: 'none', background: 'none' }}
                   >
                     🚪 Logout
                   </button>
                   <button 
-                    onClick={handleEmergencyLogout}
+                    onMouseDown={(e) => {
+                      console.log('Emergency logout button onMouseDown fired!')
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleEmergencyLogout(e)
+                    }}
+                    onClick={(e) => {
+                      console.log('Emergency logout button onClick fired!')
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }}
                     style={{ ...profileMenuItemStyles, width: '100%', textAlign: 'left', border: 'none', background: 'none', color: '#DC2626', fontSize: '0.8rem' }}
                   >
                     🔴 Emergency Logout

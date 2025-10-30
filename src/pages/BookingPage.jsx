@@ -238,11 +238,11 @@ const BookingPage = () => {
               onChange={handleChange}
               required
               min="1"
-              max="5"
+              max={theme.maxAttendees || 5}
               style={inputStyles}
             />
             <small style={{ color: '#6B7280', fontSize: '0.9rem' }}>
-              Maximum 5 people per booking
+              Maximum {theme.maxAttendees || 5} people per booking
             </small>
           </div>
 

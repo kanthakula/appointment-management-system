@@ -31,7 +31,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
   const [selectedTimeslot, setSelectedTimeslot] = useState(null)
   const [checkedInRegistrations, setCheckedInRegistrations] = useState([])
   const [loadingCheckedIn, setLoadingCheckedIn] = useState(false)
-  const [statusFilter, setStatusFilter] = useState('all') // 'all', 'published', 'draft', 'auto-archive'
+  const [statusFilter, setStatusFilter] = useState('all') // 'all', 'published', 'draft', 'auto-archive', 'archived'
   const [dateFilter, setDateFilter] = useState('') // Filter by specific date
   const [dateRangeFilter, setDateRangeFilter] = useState('all') // 'all', 'today', 'tomorrow', 'this-week', 'next-week'
 
@@ -67,6 +67,26 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
   }, [showCreateForm])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Helper function to get current filter parameters
+  const getCurrentFilters = () => {
+    const filters = {}
+    
+    if (statusFilter === 'archived') {
+      filters.archived = true
+    } else if (statusFilter === 'auto-archived') {
+      filters.archived = true
+      filters.archivedBy = 'system'
+    } else if (statusFilter === 'admin-archived') {
+      filters.archived = true
+      filters.archivedBy = 'admin'
+    } else if (statusFilter !== 'all') {
+      // For other status filters, we don't need archived=true
+      filters.archived = false
+    }
+    
+    return filters
+  }
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -149,7 +169,11 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
       const url = editingSlot ? `/api/admin/timeslots/${editingSlot.id}` : '/api/admin/timeslots'
       const method = editingSlot ? 'PUT' : 'POST'
       
-      const response = await fetch(url, {
+      // Add cache-busting parameter to prevent stale data
+      const cacheBuster = `_t=${Date.now()}`
+      const urlWithCache = url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`
+      
+      const response = await fetch(urlWithCache, {
         method: method,
         headers: {
           'Content-Type': 'application/json',
@@ -175,7 +199,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
         })
         setShowCreateForm(false)
         setEditingSlot(null)
-        onRefresh()
+        onRefresh(getCurrentFilters())
       } else {
         const errorData = await response.json()
         setError(errorData.error || `Failed to ${editingSlot ? 'update' : 'create'} timeslot`)
@@ -189,7 +213,9 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
 
   const handlePublishToggle = async (slotId, currentStatus) => {
     try {
-      const response = await fetch(`/api/admin/timeslots/${slotId}/publish`, {
+      // Add cache-busting parameter to prevent stale data
+      const cacheBuster = `_t=${Date.now()}`
+      const response = await fetch(`/api/admin/timeslots/${slotId}/publish?${cacheBuster}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -199,12 +225,13 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
       })
 
       if (response.ok) {
-        onRefresh()
+        onRefresh(getCurrentFilters())
       } else {
-        setError('Failed to update timeslot')
+        const errorData = await response.json()
+        alert(errorData.error || 'Failed to update timeslot')
       }
     } catch (err) {
-      setError('Network error')
+      alert('Network error')
     }
   }
 
@@ -214,7 +241,9 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
     }
 
     try {
-      const response = await fetch(`/api/admin/timeslots/${slotId}/archive`, {
+      // Add cache-busting parameter to prevent stale data
+      const cacheBuster = `_t=${Date.now()}`
+      const response = await fetch(`/api/admin/timeslots/${slotId}/archive?${cacheBuster}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -223,7 +252,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
       })
 
       if (response.ok) {
-        onRefresh()
+        onRefresh(getCurrentFilters())
       } else {
         setError('Failed to archive timeslot')
       }
@@ -238,13 +267,15 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
     }
 
     try {
-      const response = await fetch(`/api/admin/timeslots/${slotId}`, {
+      // Add cache-busting parameter to prevent stale data
+      const cacheBuster = `_t=${Date.now()}`
+      const response = await fetch(`/api/admin/timeslots/${slotId}?${cacheBuster}`, {
         method: 'DELETE',
         credentials: 'include',
       })
 
       if (response.ok) {
-        onRefresh()
+        onRefresh(getCurrentFilters())
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to delete timeslot')
@@ -293,8 +324,8 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
   const filteredTimeslots = timeslots.filter(timeslot => {
     // Status filter
     if (statusFilter !== 'all') {
-      if (statusFilter === 'published' && !timeslot.published) return false
-      if (statusFilter === 'draft' && timeslot.published) return false
+      if (statusFilter === 'published' && (!timeslot.published || timeslot.archived)) return false
+      if (statusFilter === 'draft' && (timeslot.published || timeslot.archived)) return false
       if (statusFilter === 'auto-archive') {
         // Show unpublished slots that are past their date
         if (timeslot.published || timeslot.archived) return false
@@ -303,6 +334,18 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
         today.setHours(0, 0, 0, 0);
         slotDate.setHours(0, 0, 0, 0);
         if (slotDate >= today) return false
+      }
+      if (statusFilter === 'archived') {
+        // Show all archived slots (both published and unpublished)
+        if (!timeslot.archived) return false
+      }
+      if (statusFilter === 'auto-archived') {
+        // Show only auto-archived slots
+        if (!timeslot.archived || timeslot.archivedBy !== 'system') return false
+      }
+      if (statusFilter === 'admin-archived') {
+        // Show only admin-archived slots
+        if (!timeslot.archived || timeslot.archivedBy === 'system') return false
       }
     }
 
@@ -373,8 +416,43 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
     return true
   })
 
+  // Helper function for timezone-aware date comparison
+  const isPastDateInUserTimezone = (slotDate) => {
+    try {
+      // Get current date in user's timezone
+      const now = new Date();
+      const userNow = new Date(now.toLocaleString('en-US'));
+      
+      // Get slot date in user's timezone
+      const userSlotDate = new Date(slotDate.toLocaleString('en-US'));
+      
+      // Normalize both to start of day
+      const userToday = new Date(userNow.getFullYear(), userNow.getMonth(), userNow.getDate());
+      const userSlotDay = new Date(userSlotDate.getFullYear(), userSlotDate.getMonth(), userSlotDate.getDate());
+      
+      return userSlotDay < userToday;
+    } catch (error) {
+      console.error('Error in timezone comparison:', error);
+      // Fallback to simple comparison
+      const slotDate = new Date(slotDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      slotDate.setHours(0, 0, 0, 0);
+      return slotDate < today;
+    }
+  };
+
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    // Parse the date string and create a local date to avoid timezone issues
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const day = date.getDate();
+    
+    // Create a new date in local timezone
+    const localDate = new Date(year, month, day);
+    
+    return localDate.toLocaleDateString('en-US', {
       weekday: 'short',
       year: 'numeric',
       month: 'short',
@@ -454,7 +532,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
               </h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <button
-                  onClick={onRefresh}
+                  onClick={() => onRefresh(getCurrentFilters())}
                   style={{
                     padding: '0.5rem 1rem',
                     backgroundColor: '#10B981',
@@ -483,14 +561,16 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                 <button
                   onClick={async () => {
                     try {
-                      const response = await fetch('/api/admin/trigger-auto-archive', {
+                      // Add cache-busting parameter to prevent stale data
+                      const cacheBuster = `_t=${Date.now()}`
+                      const response = await fetch(`/api/admin/trigger-auto-archive?${cacheBuster}`, {
                         method: 'POST',
                         credentials: 'include'
                       });
                       const result = await response.json();
                       if (response.ok) {
                         alert(`Auto-archive completed: ${result.message}`);
-                        onRefresh(); // Refresh the data
+                        onRefresh(getCurrentFilters()); // Refresh the data
                       } else {
                         alert(`Error: ${result.error}`);
                       }
@@ -555,6 +635,9 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                     <option value="published">Published</option>
                     <option value="draft">Draft</option>
                     <option value="auto-archive">Will Auto-Archive</option>
+                    <option value="archived">All Archived</option>
+                    <option value="auto-archived">Auto-Archived</option>
+                    <option value="admin-archived">Admin Archived</option>
                   </select>
                 </div>
                 
@@ -1017,7 +1100,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                     color: 'white',
                     borderRadius: '4px'
                   }}>
-                    📊 Status: {statusFilter === 'published' ? 'Published' : statusFilter === 'draft' ? 'Draft' : 'Will Auto-Archive'}
+                    📊 Status: {statusFilter === 'published' ? 'Published' : statusFilter === 'draft' ? 'Draft' : statusFilter === 'archived' ? 'All Archived' : statusFilter === 'auto-archived' ? 'Auto-Archived' : statusFilter === 'admin-archived' ? 'Admin Archived' : 'Will Auto-Archive'}
                   </span>
                 )}
               </div>
@@ -1040,9 +1123,28 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
             </tr>
           </thead>
                 <tbody>
-                  {filteredTimeslots.map((slot) => (
-              <tr key={slot.id}>
-                <td style={tdStyles}>{formatDate(slot.date)}</td>
+                  {filteredTimeslots.map((slot) => {
+                    // Check if slot is from past date using timezone-aware comparison
+                    const isPastDate = isPastDateInUserTimezone(slot.date);
+
+                    return (
+              <tr key={slot.id} style={{ 
+                backgroundColor: isPastDate ? '#FEF2F2' : 'transparent',
+                opacity: isPastDate ? 0.8 : 1
+              }}>
+                <td style={tdStyles}>
+                  {formatDate(slot.date)}
+                  {isPastDate && (
+                    <div style={{ 
+                      fontSize: '0.7rem', 
+                      color: '#DC2626',
+                      fontWeight: 'bold',
+                      marginTop: '0.25rem'
+                    }}>
+                      ⚠️ Past Date
+                    </div>
+                  )}
+                </td>
                 <td style={tdStyles}>
                   {formatTime(slot.start)}
                   {slot.end && ` - ${formatTime(slot.end)}`}
@@ -1188,10 +1290,17 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                     Edit
                   </button>
                   <button 
-                    style={buttonStyles}
+                    style={{
+                      ...buttonStyles,
+                      backgroundColor: isPastDate ? '#9CA3AF' : (slot.published ? '#10B981' : '#059669'),
+                      cursor: isPastDate ? 'not-allowed' : 'pointer',
+                      opacity: isPastDate ? 0.6 : 1
+                    }}
                     onClick={() => handlePublishToggle(slot.id, slot.published)}
+                    disabled={isPastDate}
+                    title={isPastDate ? 'Cannot publish past-dated slots' : (slot.published ? 'Unpublish this slot' : 'Publish this slot')}
                   >
-                    {slot.published ? 'Unpublish' : 'Publish'}
+                    {isPastDate ? 'Cannot Publish' : (slot.published ? 'Unpublish' : 'Publish')}
                   </button>
                   <button 
                     style={{
@@ -1216,7 +1325,8 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                   </button>
                 </td>
               </tr>
-            ))}
+                    );
+                  })}
           </tbody>
         </table>
 
@@ -1242,7 +1352,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
             <strong>Showing {filteredTimeslots.length} of {timeslots.length} time slots</strong>
             {(statusFilter !== 'all' || dateFilter || dateRangeFilter !== 'all') && (
               <span> - Filtered by: 
-                {statusFilter !== 'all' && <strong> {statusFilter === 'published' ? 'Published' : statusFilter === 'draft' ? 'Draft' : 'Will Auto-Archive'}</strong>}
+                {statusFilter !== 'all' && <strong> {statusFilter === 'published' ? 'Published' : statusFilter === 'draft' ? 'Draft' : statusFilter === 'archived' ? 'All Archived' : statusFilter === 'auto-archived' ? 'Auto-Archived' : statusFilter === 'admin-archived' ? 'Admin Archived' : 'Will Auto-Archive'}</strong>}
                 {dateFilter && <strong> Date: {(() => {
                   const filterDate = new Date(dateFilter + 'T00:00:00')
                   return filterDate.toLocaleDateString()

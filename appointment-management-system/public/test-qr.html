@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test QR Code - John Doe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        .qr-code {
+            margin: 1rem 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background: white;
+        }
+        .details {
+            margin-top: 1rem;
+            text-align: left;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .details h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .details p {
+            margin: 0.5rem 0;
+            color: #666;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test QR Code</h1>
+        
+        <div class="qr-code">
+            <img src="data:image/png;base64,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" alt="QR Code" style="max-width: 200px; height: auto;">
+        </div>
+        
+        <div class="details">
+            <h3>Registration Details</h3>
+            <p><strong>Name:</strong> John Doe</p>
+            <p><strong>Email:</strong> john@example.com</p>
+            <p><strong>Phone:</strong> 5551234567</p>
+            <p><strong>Party Size:</strong> 2 people</p>
+            <p><strong>Registration ID:</strong> cmgy5grqt0001itdoryqtfypl</p>
+        </div>
+        
+        <div class="instructions">
+            <h4>Testing Instructions:</h4>
+            <p>1. Open the Check-In Station on your mobile device</p>
+            <p>2. Select "QR Scan" mode</p>
+            <p>3. Click "Start QR Scanner"</p>
+            <p>4. Point your camera at this QR code</p>
+            <p>5. The system should find the registration and show check-in options</p>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+

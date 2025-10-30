@@ -14,7 +14,9 @@ const HomePage = () => {
 
   const fetchSlots = async () => {
     try {
-      const response = await fetch('/api/timeslots')
+      // Add cache-busting parameter to prevent stale data
+      const cacheBuster = `_t=${Date.now()}`
+      const response = await fetch(`/api/timeslots?${cacheBuster}`)
       if (response.ok) {
         const data = await response.json()
         setSlots(data)

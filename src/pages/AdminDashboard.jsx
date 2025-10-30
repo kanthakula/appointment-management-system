@@ -41,12 +41,29 @@ const AdminDashboard = () => {
     }
   }, [activeTab])
 
-  const fetchData = async () => {
+  const fetchData = async (timeslotFilters = {}) => {
     try {
+      // Build query string for timeslots API
+      const timeslotParams = new URLSearchParams()
+      if (timeslotFilters.archived !== undefined) {
+        timeslotParams.append('archived', timeslotFilters.archived)
+      }
+      if (timeslotFilters.archivedBy) {
+        timeslotParams.append('archivedBy', timeslotFilters.archivedBy)
+      }
+      
+      const timeslotUrl = `/api/admin/timeslots${timeslotParams.toString() ? '?' + timeslotParams.toString() : ''}`
+      
+      // Add cache-busting parameter to prevent stale data
+      const cacheBuster = `_t=${Date.now()}`
+      const timeslotUrlWithCache = timeslotUrl.includes('?') 
+        ? `${timeslotUrl}&${cacheBuster}` 
+        : `${timeslotUrl}?${cacheBuster}`
+      
       const [timeslotsRes, statsRes, activityRes] = await Promise.all([
-        fetch('/api/admin/timeslots', { credentials: 'include' }),
-        fetch('/api/admin/stats', { credentials: 'include' }),
-        fetch('/api/admin/recent-activity', { credentials: 'include' })
+        fetch(timeslotUrlWithCache, { credentials: 'include' }),
+        fetch(`/api/admin/stats?${cacheBuster}`, { credentials: 'include' }),
+        fetch(`/api/admin/recent-activity?${cacheBuster}`, { credentials: 'include' })
       ])
       
       if (timeslotsRes.ok) {

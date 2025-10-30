@@ -340,7 +340,8 @@ app.get('/api/config/theme', async (req, res) => {
           accentColor: '#F59E0B',
           backgroundColor: '#F9FAFB',
           textColor: '#111827',
-          timezone: 'America/Chicago'
+          timezone: 'America/Chicago',
+          maxAttendees: 5
         }
       });
     }
@@ -353,7 +354,10 @@ app.get('/api/config/theme', async (req, res) => {
 
 app.put('/api/config/theme', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { organizationName, primaryColor, secondaryColor, accentColor, backgroundColor, textColor, timezone, emailWhitelist, allowUserRegistration } = req.body;
+    const { organizationName, primaryColor, secondaryColor, accentColor, backgroundColor, textColor, timezone, emailWhitelist, allowUserRegistration, maxAttendees } = req.body;
+    
+    // Parse maxAttendees as integer
+    const parsedMaxAttendees = maxAttendees !== undefined ? parseInt(maxAttendees, 10) : undefined;
     
     let config = await prisma.organizationConfig.findFirst();
     if (!config) {
@@ -367,7 +371,8 @@ app.put('/api/config/theme', authMiddleware, adminOnly, async (req, res) => {
           textColor: textColor || '#111827',
           timezone: timezone || 'America/Chicago',
           emailWhitelist: emailWhitelist || null,
-          allowUserRegistration: allowUserRegistration !== undefined ? allowUserRegistration : false
+          allowUserRegistration: allowUserRegistration !== undefined ? allowUserRegistration : false,
+          maxAttendees: parsedMaxAttendees !== undefined ? parsedMaxAttendees : 5
         }
       });
     } else {
@@ -382,7 +387,8 @@ app.put('/api/config/theme', authMiddleware, adminOnly, async (req, res) => {
           textColor: textColor !== undefined ? textColor : config.textColor,
           timezone: timezone !== undefined ? timezone : config.timezone,
           emailWhitelist: emailWhitelist !== undefined ? emailWhitelist : config.emailWhitelist,
-          allowUserRegistration: allowUserRegistration !== undefined ? allowUserRegistration : config.allowUserRegistration
+          allowUserRegistration: allowUserRegistration !== undefined ? allowUserRegistration : config.allowUserRegistration,
+          maxAttendees: parsedMaxAttendees !== undefined ? parsedMaxAttendees : config.maxAttendees
         }
       });
     }
@@ -645,7 +651,10 @@ app.post('/api/auth/register', async (req, res) => {
 app.get('/api/timeslots', async (req, res) => {
   try {
     const slots = await prisma.timeslot.findMany({ 
-      where: { published: true }, 
+      where: { 
+        published: true,
+        archived: false  // Exclude archived slots from public booking
+      }, 
       orderBy: [{ date: 'asc' }, { start: 'asc' }]
     });
     res.json(slots);
@@ -656,7 +665,13 @@ app.get('/api/timeslots', async (req, res) => {
 
 app.get('/api/timeslots/:id', async (req, res) => {
   try {
-    const timeslot = await prisma.timeslot.findUnique({ where: { id: req.params.id } });
+    const timeslot = await prisma.timeslot.findUnique({ 
+      where: { 
+        id: req.params.id,
+        published: true,
+        archived: false  // Exclude archived slots
+      } 
+    });
     if (!timeslot) return res.status(404).json({ error: 'Timeslot not found' });
     res.json(timeslot);
   } catch (error) {
@@ -670,7 +685,12 @@ app.post('/api/register/:timeslotId', async (req, res) => {
     const { name, email, phone, recurring, partySize } = req.body;
     let partySizeNum = parseInt(partySize || '1', 10) || 1;
     if (partySizeNum < 1) partySizeNum = 1;
-    if (partySizeNum > 5) return res.status(400).json({ error: 'Maximum 5 people allowed per reservation' });
+    
+    // Get maxAttendees from organization config
+    const config = await prisma.organizationConfig.findFirst();
+    const maxAttendees = config?.maxAttendees || 5;
+    
+    if (partySizeNum > maxAttendees) return res.status(400).json({ error: `Maximum ${maxAttendees} people allowed per reservation` });
     
     const timeslotId = req.params.timeslotId;
 
@@ -935,8 +955,21 @@ app.post('/api/checkin/confirm', async (req, res) => {
 // Admin API
 app.get('/api/admin/timeslots', authMiddleware, adminOnly, async (req, res) => {
   try {
+    const { archived, archivedBy } = req.query;
+    
+    // Build where clause based on query parameters
+    let whereClause = {};
+    
+    if (archived !== undefined) {
+      whereClause.archived = archived === 'true';
+    }
+    
+    if (archivedBy) {
+      whereClause.archivedBy = archivedBy;
+    }
+    
     const slots = await prisma.timeslot.findMany({ 
-      where: { archived: false },
+      where: whereClause,
       include: {
         registrations: {
           select: {
@@ -1010,6 +1043,15 @@ app.post('/api/admin/timeslots', authMiddleware, adminOnly, async (req, res) => 
     const day = parseInt(dateParts[2]);
     const correctDate = new Date(year, month, day);
     
+    // If trying to publish, check if the slot date is in the past using timezone-aware comparison
+    if (publish) {
+      if (await isPastDateInUserTimezone(correctDate, start)) {
+        return res.status(400).json({ 
+          error: 'Cannot create published timeslots for past dates. Only future-dated slots can be published.' 
+        });
+      }
+    }
+    
     // Prepare auto-publishing data
     const autoPublishData = {};
     if (autoPublishEnabled) {
@@ -1059,11 +1101,24 @@ app.put('/api/admin/timeslots/:id/publish', authMiddleware, adminOnly, async (re
   try {
     const { publish } = req.body;
     
-    // Get timeslot details for logging
+    // Get timeslot details for validation and logging
     const existingTimeslot = await prisma.timeslot.findUnique({
       where: { id: req.params.id },
       select: { date: true, start: true, end: true }
     });
+
+    if (!existingTimeslot) {
+      return res.status(404).json({ error: 'Timeslot not found' });
+    }
+
+    // If trying to publish, check if the slot date is in the past using timezone-aware comparison
+    if (publish) {
+      if (await isPastDateInUserTimezone(existingTimeslot.date, existingTimeslot.start)) {
+        return res.status(400).json({ 
+          error: 'Cannot publish timeslots from past dates. Only future-dated slots can be published.' 
+        });
+      }
+    }
     
     const timeslot = await prisma.timeslot.update({ 
       where: { id: req.params.id }, 
@@ -1081,6 +1136,7 @@ app.put('/api/admin/timeslots/:id/publish', authMiddleware, adminOnly, async (re
     
     res.json(timeslot);
   } catch (error) {
+    console.error('Publish timeslot error:', error);
     res.status(500).json({ error: 'Failed to update timeslot' });
   }
 });
@@ -1106,6 +1162,15 @@ app.put('/api/admin/timeslots/:id', authMiddleware, adminOnly, async (req, res) 
     const month = parseInt(dateParts[1]) - 1; // JavaScript months are 0-indexed
     const day = parseInt(dateParts[2]);
     const correctDate = new Date(year, month, day);
+    
+    // If trying to publish, check if the slot date is in the past using timezone-aware comparison
+    if (publish) {
+      if (await isPastDateInUserTimezone(correctDate, start)) {
+        return res.status(400).json({ 
+          error: 'Cannot publish timeslots from past dates. Only future-dated slots can be published.' 
+        });
+      }
+    }
     
     // Prepare auto-publishing data
     const autoPublishData = {};
@@ -1168,7 +1233,7 @@ app.put('/api/admin/timeslots/:id/archive', authMiddleware, adminOnly, async (re
     
     const timeslot = await prisma.timeslot.update({ 
       where: { id: req.params.id }, 
-      data: { archived: true, published: false } 
+      data: { archived: true, published: false, archivedBy: req.user.id } 
     });
     
     // Log the action
@@ -1196,6 +1261,15 @@ app.post('/api/registrations', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Validate partySize against maxAttendees config
+    const partySizeNum = parseInt(partySize) || 1;
+    const config = await prisma.organizationConfig.findFirst();
+    const maxAttendees = config?.maxAttendees || 5;
+    
+    if (partySizeNum > maxAttendees) {
+      return res.status(400).json({ error: `Maximum ${maxAttendees} people allowed per reservation` });
+    }
+
     // Check if timeslot exists and has capacity
     const timeslot = await prisma.timeslot.findUnique({ where: { id: timeslotId } });
     if (!timeslot) {
@@ -1204,6 +1278,10 @@ app.post('/api/registrations', async (req, res) => {
 
     if (!timeslot.published) {
       return res.status(400).json({ error: 'This time slot is not available for booking' });
+    }
+
+    if (timeslot.archived) {
+      return res.status(400).json({ error: 'This time slot is no longer available for booking' });
     }
 
     if (timeslot.remaining < partySize) {
@@ -1256,12 +1334,57 @@ app.post('/api/registrations', async (req, res) => {
 
 app.put('/api/admin/timeslots/:id/restore', authMiddleware, adminOnly, async (req, res) => {
   try {
+    // First, get the timeslot to check its date
+    const existingTimeslot = await prisma.timeslot.findUnique({
+      where: { id: req.params.id }
+    });
+
+    if (!existingTimeslot) {
+      return res.status(404).json({ error: 'Timeslot not found' });
+    }
+
+    if (!existingTimeslot.archived) {
+      return res.status(400).json({ error: 'Timeslot is not archived' });
+    }
+
+    // Check if the slot date is in the past
+    const slotDate = new Date(existingTimeslot.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+    slotDate.setHours(0, 0, 0, 0); // Start of slot date
+
+    const isPastDate = slotDate < today;
+
+    // Restore the timeslot - always restore to Draft status (unpublished)
     const timeslot = await prisma.timeslot.update({ 
       where: { id: req.params.id }, 
-      data: { archived: false } 
+      data: { 
+        archived: false,
+        published: false // Always restore as Draft (unpublished)
+      } 
     });
-    res.json(timeslot);
+
+    // Log the restore action
+    try {
+      await prisma.auditLog.create({
+        data: {
+          action: 'RESTORE_TIMESLOT',
+          details: `Restored timeslot: ${timeslot.date.toISOString().slice(0,10)} ${timeslot.start}-${timeslot.end||'N/A'} (restored as Draft${isPastDate ? ' - Past date' : ''})`,
+          performedBy: req.user.id
+        }
+      });
+    } catch (logError) {
+      console.error('Error logging restore action:', logError);
+    }
+
+    res.json({
+      ...timeslot,
+      restoredAsDraft: true,
+      isPastDate: isPastDate,
+      message: isPastDate ? 'Restored as Draft (past date - cannot be published)' : 'Restored as Draft'
+    });
   } catch (error) {
+    console.error('Restore timeslot error:', error);
     res.status(500).json({ error: 'Failed to restore timeslot' });
   }
 });
@@ -2229,29 +2352,28 @@ const autoPublishCron = new cron.CronJob('*/5 * * * *', async () => {
 });
 autoPublishCron.start();
 
-// Auto-archiving cron job - runs every hour to archive unpublished slots past their date
+// Auto-archiving cron job - runs every hour to archive slots past their date
 const autoArchiveCron = new cron.CronJob('0 * * * *', async () => {
   console.log('Auto-archive job running');
   
   try {
-    const now = new Date();
-    // Use timezone-safe date comparison
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()); // Start of today
+    console.log(`Auto-archive: Checking for slots with timezone awareness`);
     
-    console.log(`Auto-archive: Checking for slots before ${today.toISOString().slice(0,10)}`);
-    
-    // Find unpublished slots that have passed their date
-    const slotsToArchive = await prisma.timeslot.findMany({
+    // Get all non-archived slots and check them individually
+    const allSlots = await prisma.timeslot.findMany({
       where: {
-        published: false,
-        archived: false,
-        date: {
-          lt: today // Date is before today
-        }
+        archived: false
       }
     });
     
-    console.log(`Found ${slotsToArchive.length} unpublished slots to archive`);
+    const slotsToArchive = [];
+    for (const slot of allSlots) {
+      if (await isPastDateInUserTimezone(slot.date, slot.start)) {
+        slotsToArchive.push(slot);
+      }
+    }
+    
+    console.log(`Found ${slotsToArchive.length} slots to archive (both published and unpublished)`);
     
     // Log details of slots found
     for (const slot of slotsToArchive) {
@@ -2259,11 +2381,13 @@ const autoArchiveCron = new cron.CronJob('0 * * * *', async () => {
     }
     
     for (const slot of slotsToArchive) {
-      // Archive the slot
+      // Archive the slot and unpublish it
       await prisma.timeslot.update({
         where: { id: slot.id },
         data: {
-          archived: true
+          archived: true,
+          published: false,
+          archivedBy: 'system'
         }
       });
       
@@ -2277,7 +2401,7 @@ const autoArchiveCron = new cron.CronJob('0 * * * *', async () => {
           await prisma.auditLog.create({
             data: {
               action: 'AUTO_ARCHIVE_TIMESLOT',
-              details: `Auto-archived unpublished timeslot: ${slot.date.toISOString().slice(0,10)} ${slot.start}-${slot.end||'N/A'} (Past date, unpublished)`,
+              details: `Auto-archived timeslot: ${slot.date.toISOString().slice(0,10)} ${slot.start}-${slot.end||'N/A'} (Past date, was ${slot.published ? 'published' : 'unpublished'})`,
               performedBy: systemUser.id
             }
           });
@@ -2286,11 +2410,11 @@ const autoArchiveCron = new cron.CronJob('0 * * * *', async () => {
         console.error('Error logging auto-archive action:', logError);
       }
       
-      console.log(`Auto-archived slot ${slot.id}: ${slot.date.toISOString().slice(0,10)} ${slot.start}`);
+      console.log(`Auto-archived slot ${slot.id}: ${slot.date.toISOString().slice(0,10)} ${slot.start} (was ${slot.published ? 'published' : 'unpublished'})`);
     }
     
     if (slotsToArchive.length > 0) {
-      console.log(`Auto-archived ${slotsToArchive.length} unpublished slots`);
+      console.log(`Auto-archived ${slotsToArchive.length} slots (both published and unpublished)`);
     } else {
       console.log('No slots found to auto-archive');
     }
@@ -2299,6 +2423,114 @@ const autoArchiveCron = new cron.CronJob('0 * * * *', async () => {
   }
 });
 autoArchiveCron.start();
+
+// Helper function to get user's timezone-aware date comparison
+async function isPastDateInUserTimezone(slotDate, slotStartTime = null, userTimezone = null) {
+  try {
+    const now = new Date();
+    
+    // If no user timezone provided, get organization timezone from database
+    if (!userTimezone) {
+      const orgConfig = await prisma.organizationConfig.findFirst();
+      userTimezone = orgConfig?.timezone || 'America/Chicago';
+    }
+    
+    // Get current time in user's timezone
+    const userNow = new Date(now.toLocaleString('en-US', { timeZone: userTimezone }));
+    
+    // Create slot datetime by combining date and start time
+    let slotDateTime;
+    if (slotStartTime) {
+      // Parse the start time (e.g., "08:05")
+      const [hours, minutes] = slotStartTime.split(':').map(Number);
+      
+      // Create slot datetime in user's timezone
+      const slotDateInUserTz = new Date(slotDate.toLocaleString('en-US', { timeZone: userTimezone }));
+      slotDateTime = new Date(slotDateInUserTz.getFullYear(), slotDateInUserTz.getMonth(), slotDateInUserTz.getDate(), hours, minutes);
+    } else {
+      // If no start time provided, use the date as-is
+      slotDateTime = new Date(slotDate.toLocaleString('en-US', { timeZone: userTimezone }));
+    }
+    
+    // Get just the date parts (year, month, day) in user's timezone
+    const userToday = new Date(userNow.getFullYear(), userNow.getMonth(), userNow.getDate());
+    const userSlotDay = new Date(slotDateTime.getFullYear(), slotDateTime.getMonth(), slotDateTime.getDate());
+    
+    // Check if the slot date is before today
+    if (userSlotDay < userToday) {
+      console.log(`Timezone check (${userTimezone}): Slot date ${userSlotDay.toISOString().slice(0,10)} is before today ${userToday.toISOString().slice(0,10)}`);
+      return true;
+    }
+    
+    // If it's the same date, check if it's past the current time
+    if (userSlotDay.getTime() === userToday.getTime()) {
+      const currentTime = userNow.getHours() * 60 + userNow.getMinutes();
+      const slotTime = slotDateTime.getHours() * 60 + slotDateTime.getMinutes();
+      
+      console.log(`Timezone check (${userTimezone}): Same date ${userSlotDay.toISOString().slice(0,10)}, Current time: ${currentTime} (${Math.floor(currentTime/60)}:${(currentTime%60).toString().padStart(2,'0')}), Slot time: ${slotTime} (${Math.floor(slotTime/60)}:${(slotTime%60).toString().padStart(2,'0')}), IsPast: ${slotTime < currentTime}`);
+      return slotTime < currentTime;
+    }
+    
+    console.log(`Timezone check (${userTimezone}): Slot date ${userSlotDay.toISOString().slice(0,10)} is in the future`);
+    return false;
+  } catch (error) {
+    console.error('Error in timezone comparison:', error);
+    // Fallback to server timezone
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const slotDay = new Date(slotDate);
+    slotDay.setHours(0, 0, 0, 0);
+    return slotDay < today;
+  }
+}
+
+// Startup check: Archive any existing published past-dated slots
+async function startupArchiveCheck() {
+  try {
+    console.log('=== Startup: Checking for published past-dated slots ===');
+    
+    // Get all published slots and check them individually with timezone awareness
+    const publishedSlots = await prisma.timeslot.findMany({
+      where: {
+        published: true,
+        archived: false
+      }
+    });
+    
+    const pastDatedSlots = [];
+    for (const slot of publishedSlots) {
+      if (await isPastDateInUserTimezone(slot.date, slot.start)) {
+        pastDatedSlots.push(slot);
+      }
+    }
+    
+    if (pastDatedSlots.length > 0) {
+      console.log(`Found ${pastDatedSlots.length} published past-dated slots to archive immediately`);
+      
+      for (const slot of pastDatedSlots) {
+        await prisma.timeslot.update({
+          where: { id: slot.id },
+          data: {
+            archived: true,
+            published: false,
+            archivedBy: 'system'
+          }
+        });
+        
+        console.log(`Archived published past-dated slot: ${slot.id} - ${slot.date.toISOString().slice(0,10)} ${slot.start}`);
+      }
+      
+      console.log(`✅ Archived ${pastDatedSlots.length} published past-dated slots`);
+    } else {
+      console.log('✅ No published past-dated slots found');
+    }
+  } catch (error) {
+    console.error('Error in startup archive check:', error);
+  }
+}
+
+// Run startup check
+startupArchiveCheck();
 
 // Manual trigger for auto-archive (for testing)
 app.post('/api/admin/trigger-auto-archive', authMiddleware, adminOrSuperAdminOnly, async (req, res) => {
@@ -2310,17 +2542,20 @@ app.post('/api/admin/trigger-auto-archive', authMiddleware, adminOrSuperAdminOnl
     
     console.log(`Manual auto-archive: Checking for slots before ${today.toISOString().slice(0,10)}`);
     
-    const slotsToArchive = await prisma.timeslot.findMany({
+    const allSlots = await prisma.timeslot.findMany({
       where: {
-        published: false,
-        archived: false,
-        date: {
-          lt: today
-        }
+        archived: false
       }
     });
     
-    console.log(`Found ${slotsToArchive.length} unpublished slots to archive`);
+    const slotsToArchive = [];
+    for (const slot of allSlots) {
+      if (await isPastDateInUserTimezone(slot.date, slot.start)) {
+        slotsToArchive.push(slot);
+      }
+    }
+    
+    console.log(`Found ${slotsToArchive.length} slots to archive (both published and unpublished)`);
     
     for (const slot of slotsToArchive) {
       console.log(`Slot to archive: ${slot.id} - Date: ${slot.date.toISOString().slice(0,10)}, Published: ${slot.published}, Archived: ${slot.archived}`);
@@ -2328,22 +2563,25 @@ app.post('/api/admin/trigger-auto-archive', authMiddleware, adminOrSuperAdminOnl
       await prisma.timeslot.update({
         where: { id: slot.id },
         data: {
-          archived: true
+          archived: true,
+          published: false,
+          archivedBy: 'system'
         }
       });
       
-      console.log(`Auto-archived slot ${slot.id}: ${slot.date.toISOString().slice(0,10)} ${slot.start}`);
+      console.log(`Auto-archived slot ${slot.id}: ${slot.date.toISOString().slice(0,10)} ${slot.start} (was ${slot.published ? 'published' : 'unpublished'})`);
     }
     
     res.json({ 
       success: true, 
-      message: `Auto-archived ${slotsToArchive.length} unpublished slots`,
+      message: `Auto-archived ${slotsToArchive.length} slots (both published and unpublished)`,
       archivedCount: slotsToArchive.length,
       archivedSlots: slotsToArchive.map(slot => ({
         id: slot.id,
         date: slot.date.toISOString().slice(0,10),
         start: slot.start,
-        end: slot.end
+        end: slot.end,
+        wasPublished: slot.published
       }))
     });
   } catch (error) {

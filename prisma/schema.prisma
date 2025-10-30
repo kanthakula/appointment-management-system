@@ -75,6 +75,7 @@ model Timeslot {
   remaining Int      @default(1)
   published Boolean  @default(false)
   archived  Boolean  @default(false)
+  archivedBy String?  // "system" for auto-archived, user ID for manual archiving
   createdBy String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -117,6 +118,7 @@ model OrganizationConfig {
   timezone          String   @default("America/Chicago")
   emailWhitelist    String?
   allowUserRegistration Boolean @default(true)
+  maxAttendees      Int      @default(5) // Maximum number of attendees per booking
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }

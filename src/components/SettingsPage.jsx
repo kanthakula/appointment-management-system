@@ -15,7 +15,8 @@ const SettingsPage = () => {
     textColor: '',
     timezone: '',
     emailWhitelist: '',
-    allowUserRegistration: true
+    allowUserRegistration: true,
+    maxAttendees: 5
   })
   const [loading, setLoading] = useState(false)
   const [logoLoading, setLogoLoading] = useState(false)
@@ -34,7 +35,8 @@ const SettingsPage = () => {
       textColor: theme.textColor || '',
       timezone: theme.timezone || '',
       emailWhitelist: theme.emailWhitelist || '',
-      allowUserRegistration: theme.allowUserRegistration !== undefined ? theme.allowUserRegistration : true
+      allowUserRegistration: theme.allowUserRegistration !== undefined ? theme.allowUserRegistration : true,
+      maxAttendees: theme.maxAttendees !== undefined ? theme.maxAttendees : 5
     })
     setLogoPreview(theme.logo)
   }, [theme])
@@ -110,7 +112,9 @@ const SettingsPage = () => {
       backgroundColor: '#F9FAFB',
       textColor: '#111827',
       timezone: 'America/Chicago',
-      emailWhitelist: ''
+      emailWhitelist: '',
+      allowUserRegistration: true,
+      maxAttendees: 5
     })
   }
 
@@ -320,6 +324,31 @@ const SettingsPage = () => {
             />
             <small style={{ color: '#6B7280', fontSize: '0.9rem' }}>
               Only allow registrations from these email domains. Leave empty to allow all domains.
+            </small>
+          </div>
+
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '0.5rem',
+              fontWeight: 'bold',
+              color: theme.textColor
+            }}>
+              Maximum Attendees per Booking
+            </label>
+            <input
+              type="number"
+              name="maxAttendees"
+              value={formData.maxAttendees}
+              onChange={handleChange}
+              min="1"
+              max="100"
+              required
+              style={inputStyles}
+              placeholder="5"
+            />
+            <small style={{ color: '#6B7280', fontSize: '0.9rem' }}>
+              Maximum number of people that can be booked in a single reservation. This will be enforced during the booking process.
             </small>
           </div>
 

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Scanner Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+        }
+        #qr-scanner {
+            width: 100%;
+            min-height: 300px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f9f9f9;
+        }
+        button {
+            background: #FF6B35;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #e55a2b;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 1rem 0;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .info {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QR Scanner Test</h1>
+        
+        <div id="qr-scanner">
+            <div style="color: #666;">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
+                <div>Camera will appear here</div>
+            </div>
+        </div>
+        
+        <button id="startBtn" onclick="startScanner()">Start QR Scanner</button>
+        <button id="stopBtn" onclick="stopScanner()" style="display: none; background: #ef4444;">Stop Scanner</button>
+        
+        <div id="status"></div>
+        
+        <div id="result" style="display: none; margin-top: 1rem; padding: 1rem; background: #f0f9ff; border-radius: 8px;">
+            <h3>QR Code Detected!</h3>
+            <p id="qrText"></p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        let html5QrcodeScanner = null;
+        
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        function startScanner() {
+            showStatus('Starting camera...', 'info');
+            
+            // Clear previous scanner
+            document.getElementById('qr-scanner').innerHTML = '';
+            
+            try {
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "qr-scanner",
+                    {
+                        fps: 10,
+                        qrbox: { width: 250, height: 250 },
+                        aspectRatio: 1.0,
+                        showTorchButtonIfSupported: true,
+                        showZoomSliderIfSupported: true,
+                        defaultZoomValueIfSupported: 2,
+                        useBarCodeDetectorIfSupported: true,
+                        experimentalFeatures: {
+                            useBarCodeDetectorIfSupported: true
+                        },
+                        rememberLastUsedCamera: true
+                    },
+                    false
+                );
+                
+                html5QrcodeScanner.render(
+                    (decodedText, decodedResult) => {
+                        console.log('QR Code detected:', decodedText);
+                        showStatus('QR Code detected!', 'success');
+                        
+                        document.getElementById('qrText').textContent = decodedText;
+                        document.getElementById('result').style.display = 'block';
+                        
+                        // Stop scanner after detection
+                        stopScanner();
+                    },
+                    (error) => {
+                        // Only show errors that aren't "No QR code found"
+                        if (!error.includes('No QR code found') && !error.includes('NotFoundException')) {
+                            console.log('QR scan error:', error);
+                        }
+                    }
+                );
+                
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'inline-block';
+                showStatus('Camera active - Point at QR code to scan', 'info');
+                
+            } catch (error) {
+                console.error('Failed to start scanner:', error);
+                showStatus('Failed to start camera. Please check permissions.', 'error');
+            }
+        }
+        
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                try {
+                    html5QrcodeScanner.clear();
+                } catch (error) {
+                    console.log('Error stopping scanner:', error);
+                }
+                html5QrcodeScanner = null;
+            }
+            
+            document.getElementById('qr-scanner').innerHTML = `
+                <div style="color: #666;">
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
+                    <div>Camera stopped</div>
+                </div>
+            `;
+            
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('stopBtn').style.display = 'none';
+            showStatus('Scanner stopped', 'info');
+        }
+        
+        // Test with the registration ID
+        function testWithId() {
+            const testId = 'cmgy5grqt0001itdoryqtfypl';
+            document.getElementById('qrText').textContent = testId;
+            document.getElementById('result').style.display = 'block';
+            showStatus('Test ID loaded: ' + testId, 'success');
+        }
+    </script>
+    
+    <div style="margin-top: 2rem;">
+        <button onclick="testWithId()" style="background: #10b981;">Test with Registration ID</button>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+

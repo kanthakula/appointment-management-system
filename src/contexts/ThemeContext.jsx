@@ -20,7 +20,8 @@ export const ThemeProvider = ({ children }) => {
     backgroundColor: '#F9FAFB',
     textColor: '#111827',
     timezone: 'America/Chicago',
-    allowUserRegistration: true
+    allowUserRegistration: true,
+    maxAttendees: 5
   })
 
   const [loading, setLoading] = useState(true)
