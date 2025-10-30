@@ -8,6 +8,8 @@ This guide walks through the main UI screens and typical flows for demos, UAT, a
 
 ## 1. Public Site (Visitor)
 
+![Home](images/home.png)
+
 - Landing (Home)
   - Shows organization logo/name and available published time slots
   - CTA buttons: Admin Dashboard (authenticated), Check-In, Login
@@ -27,6 +29,8 @@ This guide walks through the main UI screens and typical flows for demos, UAT, a
 
 ## 2. Admin Login
 
+![Login](images/login.png)
+
 - Navigate to `http://localhost:3000/admin`
 - If not authenticated, redirected to Login
 - Enter admin credentials → lands on Admin Dashboard
@@ -44,6 +48,8 @@ Header (persistent):
 
 ## 3. Dashboard (Overview)
 
+![Dashboard](images/dashboard.png)
+
 - Tiles:
   - Total Slots
   - Published
@@ -59,6 +65,8 @@ Header (persistent):
 ---
 
 ## 4. Time Slots Management
+
+![Time Slots](images/timeslots.png)
 
 Main actions:
 
@@ -83,6 +91,8 @@ Rules/Notes:
 
 ## 5. Archived Slots
 
+![Archived Slots](images/archived.png)
+
 - Filters:
   - Archived By: All, 🤖 Auto-Archived, 👤 Admin Archived, 📁 Legacy Archived
   - Slot Date, Archived Date
@@ -95,6 +105,8 @@ Rules/Notes:
 
 ## 6. Bookings Management
 
+![Bookings](images/bookings.png)
+
 - Search: by name, email, phone
 - Filters: by slot date or date range (mutually exclusive when a specific date is selected)
 - Table: booking details, check-in status, party size, actions
@@ -103,6 +115,8 @@ Rules/Notes:
 ---
 
 ## 7. Check‑In Station
+
+![Check-In](images/checkin.png)
 
 - Entry points: Header “Check-In” or direct route
 - Modes:
@@ -116,6 +130,8 @@ Rules/Notes:
 
 ## 8. Admin Users Management (RBAC)
 
+![Admin Users](images/admin-users.png)
+
 - Create/Edit users
 - Assign multiple roles per user:
   - Super Admin, Admin, CheckIn User, Reporting
@@ -125,6 +141,8 @@ Rules/Notes:
 ---
 
 ## 9. Settings
+
+![Settings](images/settings.png)
 
 - Organization
   - Name, Logo upload
@@ -140,6 +158,8 @@ Rules/Notes:
 ---
 
 ## 10. Header Profile Menu
+
+![Profile Menu](images/profile-menu.png)
 
 - Click avatar → dropdown
 - Change Profile Picture
@@ -175,18 +195,21 @@ Rules/Notes:
 
 ---
 
-## 13. Screenshots (Optional)
+## 13. Screenshots
 
-Add screenshots under `docs/images/` and embed here:
+Place PNGs under `docs/images/` with these filenames:
 
 ```
-![Dashboard](../docs/images/dashboard.png)
-![Time Slots](../docs/images/timeslots.png)
-![Archived Slots](../docs/images/archived.png)
-![Bookings](../docs/images/bookings.png)
-![Settings](../docs/images/settings.png)
+images/home.png
+images/login.png
+images/dashboard.png
+images/timeslots.png
+images/archived.png
+images/bookings.png
+images/checkin.png
+images/admin-users.png
+images/settings.png
+images/profile-menu.png
 ```
 
----
-
-That’s it — this guide should be enough to demo DarshanFlow end‑to‑end.
+If paths differ, update the links above accordingly.
