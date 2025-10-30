@@ -105,11 +105,12 @@ Key principles:
    ```
 
 4. **Access the Application**
-   - **Main Site**: http://localhost:3000
-   - **Admin Panel**: http://localhost:3000/admin
-   - **Default Admin Login**:
-     - Email: `admin@darshanflow.com`
-     - Password: `admin123`
+
+- **Main Site**: http://localhost:3000
+- **Admin Panel**: http://localhost:3000/admin
+- **Default Admin Login**:
+  - Email: `admin@darshanflow.com`
+  - Password: `admin123`
 
 ## 🗂️ Codebase Overview
 
@@ -309,74 +310,31 @@ Postgres helpers: see `scripts/` (connect tests, env checks, direct migrations).
 
 ## 🚀 Deployment
 
-## 🎨 Customization Guide
-
-### Organization Settings
-
-1. Login as admin
-2. Navigate to Settings tab
-3. Update organization name, colors, and timezone
-4. Configure email whitelist if needed
-5. Save changes
-
-### Theme Colors
-
-- **Primary**: Main brand color (headers, buttons)
-- **Secondary**: Accent color (success actions)
-- **Accent**: Highlight color (alerts, highlights)
-- **Background**: Page background color
-- **Text**: Main text color
-
-### Adding New Features
-
-1. **Frontend**: Add components in `src/components/`
-2. **Backend**: Add routes in `server.js`
-3. **Database**: Update schema in `prisma/schema.prisma`
-4. **Migration**: Run `npx prisma migrate dev`
-
-## 🔒 Security Features
-
-- **Password Hashing**: Secure password storage with salt
-- **JWT Authentication**: Stateless authentication tokens
-- **Input Validation**: Server-side validation for all inputs
-- **SQL Injection Protection**: Prisma ORM prevents SQL injection
-- **CORS Configuration**: Controlled cross-origin requests
-- **Email Whitelisting**: Optional domain restriction
-
-## 📱 Mobile Support
-
-- **Responsive Design**: Works on all device sizes
-- **Touch-Friendly**: Large buttons and touch targets
-- **QR Code Scanning**: Mobile-optimized check-in interface
-- **Offline Capability**: Basic functionality works offline
-- **Progressive Web App**: Can be installed on mobile devices
-
-## 🚀 Deployment
-
 ### Production Setup
 
 1. **Environment Variables**
 
-   ```bash
-   DATABASE_URL=postgresql://user:pass@host:5432/db
-   JWT_SECRET=your-secret-key
-   EMAIL_HOST=smtp.gmail.com
-   EMAIL_USER=your-email@gmail.com
-   EMAIL_PASS=your-app-password
-   PORT=3000
-   ```
+```bash
+DATABASE_URL=postgresql://user:pass@host:5432/db
+JWT_SECRET=your-secret-key
+EMAIL_HOST=smtp.gmail.com
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+PORT=3000
+```
 
 2. **Database Migration**
 
-   ```bash
-   npx prisma migrate deploy
-   ```
+```bash
+npx prisma migrate deploy
+```
 
 3. **Build and Start**
-   ```bash
-   npm run build
-   npm start
-   ```
+
+```bash
+npm run build
+npm start
+```
 
 ### Docker Deployment
 
@@ -464,10 +422,7 @@ git remote add origin git@github.com:<owner>/<repo>.git
 Daily flow:
 
 ```bash
-git pull --rebase origin main
-git add -A
-git commit -m "feat/fix: concise message"
-git push -u origin main
+git pull --rebase origin maingit add -Agit commit -m "feat/fix: concise message"git push -u origin main
 ```
 
 Tagging a release:
@@ -476,6 +431,14 @@ Tagging a release:
 git tag -a v1.0.0 -m "First stable"
 git push origin v1.0.0
 ```
+
+---
+
+## 📸 UI Demo Guide
+
+For a step-by-step demo script with screen-by-screen instructions, see:
+
+- `docs/UI_DEMO.md`
 
 ---
 
