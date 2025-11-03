@@ -17,6 +17,12 @@ const HomePage = () => {
 
   useEffect(() => {
     fetchSlots()
+    // Refresh slots when returning to page (e.g., after adding to waitlist)
+    const handleFocus = () => {
+      fetchSlots()
+    }
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
   }, [])
 
   const fetchSlots = async () => {
