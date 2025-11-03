@@ -2762,21 +2762,38 @@ app.post('/api/booking/natural-language', async (req, res) => {
     }
 
     // Parse intent using AI
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1; // 1-12
+
     const prompt = `Extract booking intent from this user message: "${message}"
 
-Today's date: ${new Date().toISOString().split('T')[0]}
+Today's date: ${todayStr} (${today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })})
+Current year: ${currentYear}, Current month: ${currentMonth}
 
 Return JSON with:
 - action: "book" | "cancel" | "find" | "modify" | "check"
-- date: actual date in YYYY-MM-DD format. If user says "tomorrow", calculate tomorrow's date. If "next sunday", calculate next Sunday's date. If "this weekend", use next Saturday. If relative date like "next week", calculate it.
-- time: preferred time as "morning" (before 12:00), "afternoon" (12:00-17:00), "evening" (after 17:00), or specific time like "14:00" if mentioned
+- date: actual date in YYYY-MM-DD format. IMPORTANT: If user mentions a specific date like "November 3rd", "Nov 3", "3rd November", use the CURRENT YEAR (${currentYear}) unless they specify otherwise. 
+  Examples:
+  - "November 3rd" → "${currentYear}-11-03" (if current month is November or later, otherwise next year)
+  - "November 3" → "${currentYear}-11-03"
+  - "Nov 3rd" → "${currentYear}-11-03"
+  - If user says "tomorrow", calculate tomorrow's date
+  - If "next sunday", calculate next Sunday's date
+  - If "this weekend", use next Saturday
+- time: preferred time as "morning" (before 12:00), "afternoon" (12:00-17:00), "evening" (after 17:00), or specific time like "14:00" if mentioned. If user says "best time" or "best slot", set to null (no time preference).
 - partySize: number if mentioned, otherwise null
 - urgency: "high" | "medium" | "low" based on language used
 
 Examples:
 - "Book me for next Sunday afternoon for 3 people" → {"action": "book", "date": "2025-11-09", "time": "afternoon", "partySize": 3, "urgency": "medium"}
+- "book me the best time based on available slot on November 3rd" → {"action": "book", "date": "${currentYear}-11-03", "time": null, "partySize": null, "urgency": "medium"}
+- "Find me slots on November 3" → {"action": "find", "date": "${currentYear}-11-03", "time": null, "partySize": null, "urgency": "medium"}
 - "I need to cancel my booking" → {"action": "cancel", "date": null, "time": null, "partySize": null, "urgency": "high"}
 - "Find me slots tomorrow morning" → {"action": "find", "date": "2025-11-03", "time": "morning", "partySize": null, "urgency": "medium"}
+
+CRITICAL: For dates like "November 3rd" or "Nov 3", use year ${currentYear} if the date hasn't passed yet this year, otherwise use ${currentYear + 1}.
 
 Respond in JSON format only.`;
 
@@ -2821,11 +2838,15 @@ Respond in JSON format only.`;
       // Build date filter
       let dateFilter = {};
       if (intent.date) {
-        const targetDate = new Date(intent.date);
+        // Parse the date string (YYYY-MM-DD format)
+        const [year, month, day] = intent.date.split('-').map(Number);
+        const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+        
         dateFilter = {
           date: {
-            gte: new Date(targetDate.setHours(0, 0, 0, 0)),
-            lt: new Date(targetDate.setHours(23, 59, 59, 999))
+            gte: startOfDay,
+            lte: endOfDay
           }
         };
       } else {
