@@ -183,6 +183,13 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
       })
 
       if (response.ok) {
+        const result = await response.json()
+        
+        // If slot was copied (archived slot with bookings/waitlist), show success message
+        if (result.isCopy && result.message) {
+          alert(result.message)
+        }
+        
         // Keep the same date for convenience, reset other fields
         const currentDate = formData.date
         setFormData({
