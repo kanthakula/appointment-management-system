@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, Link, useParams } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
+import AIRecommendations from '../components/AIRecommendations'
 
 const BookingPage = () => {
   const { theme } = useTheme()
@@ -17,6 +18,10 @@ const BookingPage = () => {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showNaturalLanguage, setShowNaturalLanguage] = useState(false)
+  const [nlMessage, setNlMessage] = useState('')
+  const [nlLoading, setNlLoading] = useState(false)
+  const [nlResults, setNlResults] = useState(null)
 
   useEffect(() => {
     // Fetch timeslot details if timeslotId is provided
@@ -48,6 +53,44 @@ const BookingPage = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }))
+  }
+
+  const handleNaturalLanguageBooking = async () => {
+    if (!nlMessage.trim()) return
+
+    setNlLoading(true)
+    setNlResults(null)
+
+    try {
+      const response = await fetch('/api/booking/natural-language', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: nlMessage,
+          email: formData.email || 'guest@example.com'
+        })
+      })
+
+      const data = await response.json()
+      setNlResults(data)
+
+      // If slots found and user wants to book, navigate to first slot
+      if (data.matchingSlots && data.matchingSlots.length > 0 && data.intent.action === 'book') {
+        // Auto-select first matching slot
+        const firstSlot = data.matchingSlots[0]
+        setTimeslot(firstSlot)
+      }
+    } catch (err) {
+      setNlResults({ error: 'Failed to process. Please try again.' })
+    } finally {
+      setNlLoading(false)
+    }
+  }
+
+  const handleSelectRecommendedSlot = (slot) => {
+    setTimeslot(slot)
+    // Scroll to booking form
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleSubmit = async (e) => {
@@ -159,6 +202,142 @@ const BookingPage = () => {
           }}>
             {error}
           </div>
+        )}
+
+        {/* Natural Language Booking Section */}
+        <div style={{
+          marginBottom: '2rem',
+          padding: '1.5rem',
+          backgroundColor: '#F9FAFB',
+          borderRadius: '8px',
+          border: `2px solid ${theme.accentColor || theme.primaryColor || '#3B82F6'}`
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '1rem'
+          }}>
+            <h3 style={{
+              margin: 0,
+              color: theme.primaryColor,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              💬 Book with Natural Language
+            </h3>
+            <button
+              onClick={() => setShowNaturalLanguage(!showNaturalLanguage)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: theme.primaryColor,
+                cursor: 'pointer',
+                fontSize: '14px',
+                textDecoration: 'underline'
+              }}
+            >
+              {showNaturalLanguage ? 'Hide' : 'Try it'}
+            </button>
+          </div>
+
+          {showNaturalLanguage && (
+            <div>
+              <div style={{ marginBottom: '1rem' }}>
+                <input
+                  type="text"
+                  value={nlMessage}
+                  onChange={(e) => setNlMessage(e.target.value)}
+                  placeholder='Try: "Book me for next Sunday afternoon for 3 people" or "Find me slots tomorrow morning"'
+                  style={{
+                    ...inputStyles,
+                    fontSize: '14px'
+                  }}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleNaturalLanguageBooking()
+                    }
+                  }}
+                />
+              </div>
+              <button
+                onClick={handleNaturalLanguageBooking}
+                disabled={nlLoading || !nlMessage.trim()}
+                style={{
+                  ...buttonStyles,
+                  marginBottom: '1rem',
+                  opacity: (nlLoading || !nlMessage.trim()) ? 0.6 : 1
+                }}
+              >
+                {nlLoading ? 'Processing...' : '✨ Find Slots'}
+              </button>
+
+              {nlResults && (
+                <div style={{
+                  padding: '1rem',
+                  backgroundColor: nlResults.error ? '#FEE2E2' : '#D1FAE5',
+                  borderRadius: '6px',
+                  color: nlResults.error ? '#DC2626' : '#065F46'
+                }}>
+                  {nlResults.error ? (
+                    <p style={{ margin: 0 }}>{nlResults.error}</p>
+                  ) : (
+                    <div>
+                      <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold' }}>
+                        {nlResults.message}
+                      </p>
+                      {nlResults.matchingSlots && nlResults.matchingSlots.length > 0 && (
+                        <div>
+                          <p style={{ margin: '0.5rem 0', fontSize: '14px' }}>
+                            Found {nlResults.matchingSlots.length} slot(s):
+                          </p>
+                          {nlResults.matchingSlots.slice(0, 3).map((slot) => (
+                            <div
+                              key={slot.id}
+                              onClick={() => handleSelectRecommendedSlot(slot)}
+                              style={{
+                                padding: '0.75rem',
+                                margin: '0.5rem 0',
+                                backgroundColor: '#fff',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                border: `2px solid ${theme.primaryColor}`,
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)'
+                                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)'
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)'
+                                e.currentTarget.style.boxShadow = 'none'
+                              }}
+                            >
+                              <strong>{new Date(slot.date).toLocaleDateString()}</strong> at {slot.start}
+                              {slot.end && ` - ${slot.end}`}
+                              <br />
+                              <small style={{ color: '#6B7280' }}>
+                                {slot.remaining} spots remaining
+                              </small>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* AI Recommendations - Show when email is entered */}
+        {formData.email && formData.email.includes('@') && (
+          <AIRecommendations
+            email={formData.email}
+            onSelectSlot={handleSelectRecommendedSlot}
+          />
         )}
 
         <form onSubmit={handleSubmit}>

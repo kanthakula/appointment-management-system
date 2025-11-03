@@ -1,0 +1,16 @@
+# Quick Test Commands - Copy and Paste
+
+# 1. Test Smart Recommendations
+curl "http://localhost:3002/api/slots/recommendations?email=test@example.com"
+
+# 2. Test Natural Language - Find
+curl -X POST http://localhost:3002/api/booking/natural-language -H "Content-Type: application/json" -d '{"message": "Find me slots for tomorrow afternoon", "email": "test@example.com"}'
+
+# 3. Test Natural Language - Book
+curl -X POST http://localhost:3002/api/booking/natural-language -H "Content-Type: application/json" -d '{"message": "Book me for next Sunday afternoon for 3 people", "email": "test@example.com"}'
+
+# 4. Test Email Generation
+curl -X POST http://localhost:3002/api/ai/generate-email -H "Content-Type: application/json" -d '{"type": "confirmation", "bookingData": {"name": "John Doe", "date": "2025-11-10", "time": "14:00", "partySize": 2}}'
+
+# 5. Run All Automated Tests
+node tests/ai-tests.js
