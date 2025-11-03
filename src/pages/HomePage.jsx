@@ -200,8 +200,20 @@ const HomePage = () => {
                 Reserve Slot
               </Link>
             ) : (
-              <div style={fullButtonStyles}>
-                Full / Unavailable
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={fullButtonStyles}>
+                  Full / Unavailable
+                </div>
+                <Link
+                  to={`/waitlist/${slot.id}`}
+                  style={{
+                    ...buttonStyles,
+                    backgroundColor: '#DC2626',
+                    border: '2px solid #DC2626'
+                  }}
+                >
+                  Add to Waitlist
+                </Link>
               </div>
             )}
           </div>

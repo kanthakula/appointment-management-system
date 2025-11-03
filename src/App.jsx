@@ -7,6 +7,7 @@ import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import BookingPage from './pages/BookingPage'
+import WaitlistPage from './pages/WaitlistPage'
 import AdminDashboard from './pages/AdminDashboard'
 import CheckInPage from './pages/CheckInPage'
 import ConfirmationPage from './pages/ConfirmationPage'
@@ -20,6 +21,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register/:timeslotId" element={<BookingPage />} />
+            <Route path="/waitlist/:timeslotId" element={<WaitlistPage />} />
             <Route path="/admin" element={
               <ProtectedRoute requireAdmin={true}>
                 <AdminDashboard />

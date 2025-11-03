@@ -16,7 +16,8 @@ const SettingsPage = () => {
     timezone: '',
     emailWhitelist: '',
     allowUserRegistration: true,
-    maxAttendees: 5
+    maxAttendees: 5,
+    waitlistPercentage: 10
   })
   const [loading, setLoading] = useState(false)
   const [logoLoading, setLogoLoading] = useState(false)
@@ -36,7 +37,8 @@ const SettingsPage = () => {
       timezone: theme.timezone || '',
       emailWhitelist: theme.emailWhitelist || '',
       allowUserRegistration: theme.allowUserRegistration !== undefined ? theme.allowUserRegistration : true,
-      maxAttendees: theme.maxAttendees !== undefined ? theme.maxAttendees : 5
+      maxAttendees: theme.maxAttendees !== undefined ? theme.maxAttendees : 5,
+      waitlistPercentage: theme.waitlistPercentage !== undefined ? theme.waitlistPercentage : 10
     })
     setLogoPreview(theme.logo)
   }, [theme])
@@ -114,7 +116,8 @@ const SettingsPage = () => {
       timezone: 'America/Chicago',
       emailWhitelist: '',
       allowUserRegistration: true,
-      maxAttendees: 5
+      maxAttendees: 5,
+      waitlistPercentage: 10
     })
   }
 
@@ -349,6 +352,33 @@ const SettingsPage = () => {
             />
             <small style={{ color: '#6B7280', fontSize: '0.9rem' }}>
               Maximum number of people that can be booked in a single reservation. This will be enforced during the booking process.
+            </small>
+          </div>
+
+          <div>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '0.5rem',
+              fontWeight: 'bold',
+              color: theme.textColor
+            }}>
+              Waitlist Percentage
+            </label>
+            <input
+              type="number"
+              name="waitlistPercentage"
+              value={formData.waitlistPercentage}
+              onChange={handleChange}
+              min="0"
+              max="100"
+              required
+              style={inputStyles}
+              placeholder="10"
+            />
+            <small style={{ color: '#6B7280', fontSize: '0.9rem' }}>
+              Percentage of slot capacity that can be added to waitlist when slots are full. 
+              Example: If set to 10% and a slot has 100 seats, up to 10 additional people can join the waitlist. 
+              Waitlist entries are prioritized by timestamp (first come, first served).
             </small>
           </div>
 

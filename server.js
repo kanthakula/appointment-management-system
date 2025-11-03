@@ -1307,9 +1307,10 @@ app.post('/api/registrations', async (req, res) => {
     });
 
     // Update timeslot capacity
-    await prisma.timeslot.update({
+    const updatedTimeslot = await prisma.timeslot.update({
       where: { id: timeslotId },
-      data: { remaining: timeslot.remaining - parseInt(partySize) }
+      data: { remaining: timeslot.remaining - parseInt(partySize) },
+      select: { remaining: true }
     });
 
     // If recurring visitor, create/update user record
@@ -1332,9 +1333,291 @@ app.post('/api/registrations', async (req, res) => {
     }
 
     res.status(201).json(registration);
+    
+    // Trigger waitlist promotion check (async, don't wait)
+    promoteFromWaitlist(timeslotId, updatedTimeslot.remaining).catch(err => {
+      console.error('Waitlist promotion error:', err);
+    });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Failed to create registration' });
+  }
+});
+
+// ============================================
+// WAITLIST MANAGEMENT ENDPOINTS
+// ============================================
+
+// Helper function to calculate waitlist capacity
+async function getWaitlistCapacity(timeslotId) {
+  const timeslot = await prisma.timeslot.findUnique({ where: { id: timeslotId } });
+  if (!timeslot) return 0;
+  
+  const config = await prisma.organizationConfig.findFirst();
+  const waitlistPercentage = config?.waitlistPercentage || 10;
+  
+  // Calculate waitlist capacity: percentage of total capacity
+  return Math.floor((timeslot.capacity * waitlistPercentage) / 100);
+}
+
+// Helper function to promote waitlist entries when slots become available
+async function promoteFromWaitlist(timeslotId, availableSpots) {
+  if (availableSpots <= 0) return { promoted: 0, entries: [] };
+  
+  const config = await prisma.organizationConfig.findFirst();
+  const maxAttendees = config?.maxAttendees || 5;
+  
+  // Get waitlist entries ordered by position (first come, first served)
+  const waitlistEntries = await prisma.waitlistEntry.findMany({
+    where: {
+      timeslotId,
+      notified: false
+    },
+    orderBy: {
+      position: 'asc'
+    }
+  });
+  
+  let spotsUsed = 0;
+  const promotedEntries = [];
+  
+  for (const entry of waitlistEntries) {
+    if (spotsUsed + entry.partySize > availableSpots) break;
+    if (entry.partySize > maxAttendees) continue; // Skip if party size exceeds limit
+    
+    try {
+      // Create registration for this waitlist entry
+      const registration = await prisma.registration.create({
+        data: {
+          fullName: entry.fullName,
+          email: entry.email,
+          phone: entry.phone,
+          partySize: entry.partySize,
+          timeslotId: entry.timeslotId,
+          method: 'waitlist_promoted'
+        }
+      });
+      
+      // Mark waitlist entry as notified and processed
+      await prisma.waitlistEntry.update({
+        where: { id: entry.id },
+        data: { notified: true }
+      });
+      
+      // Delete waitlist entry
+      await prisma.waitlistEntry.delete({
+        where: { id: entry.id }
+      });
+      
+      // Update timeslot remaining
+      const timeslot = await prisma.timeslot.findUnique({ where: { id: timeslotId } });
+      await prisma.timeslot.update({
+        where: { id: timeslotId },
+        data: { remaining: timeslot.remaining - entry.partySize }
+      });
+      
+      spotsUsed += entry.partySize;
+      promotedEntries.push({ ...registration, originalWaitlistEntry: entry });
+      
+      // Send notification email
+      const message = `Great news! A spot has become available for your waitlisted appointment on ${new Date(timeslot.date).toLocaleDateString()} at ${timeslot.start}. Your booking is now confirmed!`;
+      await sendEmail(entry.email, 'Waitlist Promotion - Booking Confirmed', message, `<p>${message}</p>`).catch(() => {});
+      
+    } catch (error) {
+      console.error(`Failed to promote waitlist entry ${entry.id}:`, error);
+      // Continue with next entry even if one fails
+    }
+  }
+  
+  return { promoted: promotedEntries.length, entries: promotedEntries };
+}
+
+// Add to Waitlist
+// POST /api/waitlist/:timeslotId
+app.post('/api/waitlist/:timeslotId', async (req, res) => {
+  try {
+    const { fullName, email, phone, partySize } = req.body;
+    const { timeslotId } = req.params;
+    
+    // Validate required fields
+    if (!fullName || !email || !phone) {
+      return res.status(400).json({ error: 'Full name, email, and phone are required' });
+    }
+    
+    const partySizeNum = parseInt(partySize) || 1;
+    const config = await prisma.organizationConfig.findFirst();
+    const maxAttendees = config?.maxAttendees || 5;
+    
+    if (partySizeNum > maxAttendees) {
+      return res.status(400).json({ error: `Maximum ${maxAttendees} people allowed per waitlist entry` });
+    }
+    
+    // Check if timeslot exists
+    const timeslot = await prisma.timeslot.findUnique({ where: { id: timeslotId } });
+    if (!timeslot) {
+      return res.status(404).json({ error: 'Time slot not found' });
+    }
+    
+    if (!timeslot.published || timeslot.archived) {
+      return res.status(400).json({ error: 'This time slot is not available for waitlist' });
+    }
+    
+    // Check if slot is actually full (remaining should be 0 or less)
+    if (timeslot.remaining > 0) {
+      return res.status(400).json({ 
+        error: 'This slot still has availability. Please book directly instead of waitlist.' 
+      });
+    }
+    
+    // Calculate waitlist capacity
+    const waitlistCapacity = await getWaitlistCapacity(timeslotId);
+    
+    // Get current waitlist count
+    const currentWaitlistCount = await prisma.waitlistEntry.count({
+      where: { timeslotId }
+    });
+    
+    // Check if waitlist is full
+    if (currentWaitlistCount >= waitlistCapacity) {
+      return res.status(400).json({ 
+        error: `Waitlist is full. Maximum ${waitlistCapacity} entries allowed (${config?.waitlistPercentage || 10}% of capacity).` 
+      });
+    }
+    
+    // Check if user already exists in waitlist for this slot
+    const existingEntry = await prisma.waitlistEntry.findFirst({
+      where: {
+        timeslotId,
+        email: email
+      }
+    });
+    
+    if (existingEntry) {
+      return res.status(400).json({ 
+        error: 'You are already on the waitlist for this slot.' 
+      });
+    }
+    
+    // Get next position in waitlist
+    const maxPosition = await prisma.waitlistEntry.aggregate({
+      where: { timeslotId },
+      _max: { position: true }
+    });
+    const nextPosition = (maxPosition._max.position || 0) + 1;
+    
+    // Create waitlist entry
+    const waitlistEntry = await prisma.waitlistEntry.create({
+      data: {
+        timeslotId,
+        fullName,
+        email,
+        phone,
+        partySize: partySizeNum,
+        position: nextPosition
+      }
+    });
+    
+    res.status(201).json({
+      ...waitlistEntry,
+      waitlistPosition: nextPosition,
+      totalWaitlistCapacity: waitlistCapacity,
+      message: `You've been added to the waitlist at position ${nextPosition}. We'll notify you if a spot becomes available.`
+    });
+  } catch (error) {
+    console.error('Waitlist error:', error);
+    res.status(500).json({ error: 'Failed to add to waitlist' });
+  }
+});
+
+// Get Waitlist for a Slot (Admin only)
+// GET /api/admin/waitlist/:timeslotId
+app.get('/api/admin/waitlist/:timeslotId', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { timeslotId } = req.params;
+    
+    const waitlistEntries = await prisma.waitlistEntry.findMany({
+      where: { timeslotId },
+      orderBy: { position: 'asc' }
+    });
+    
+    const timeslot = await prisma.timeslot.findUnique({ where: { id: timeslotId } });
+    const waitlistCapacity = await getWaitlistCapacity(timeslotId);
+    
+    res.json({
+      entries: waitlistEntries,
+      totalCount: waitlistEntries.length,
+      capacity: waitlistCapacity,
+      remaining: waitlistCapacity - waitlistEntries.length,
+      slotCapacity: timeslot?.capacity || 0,
+      slotRemaining: timeslot?.remaining || 0
+    });
+  } catch (error) {
+    console.error('Get waitlist error:', error);
+    res.status(500).json({ error: 'Failed to fetch waitlist' });
+  }
+});
+
+// Get User's Waitlist Status
+// GET /api/waitlist/status?email=user@example.com
+app.get('/api/waitlist/status', async (req, res) => {
+  try {
+    const { email } = req.query;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+    
+    const waitlistEntries = await prisma.waitlistEntry.findMany({
+      where: { email },
+      include: {
+        timeslot: {
+          select: {
+            id: true,
+            date: true,
+            start: true,
+            end: true,
+            capacity: true,
+            remaining: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    res.json({
+      entries: waitlistEntries,
+      count: waitlistEntries.length
+    });
+  } catch (error) {
+    console.error('Get waitlist status error:', error);
+    res.status(500).json({ error: 'Failed to fetch waitlist status' });
+  }
+});
+
+// Remove from Waitlist (User)
+// DELETE /api/waitlist/:entryId
+app.delete('/api/waitlist/:entryId', async (req, res) => {
+  try {
+    const { entryId } = req.params;
+    const { email } = req.body;
+    
+    const entry = await prisma.waitlistEntry.findUnique({ where: { id: entryId } });
+    
+    if (!entry) {
+      return res.status(404).json({ error: 'Waitlist entry not found' });
+    }
+    
+    // Verify ownership (optional security check)
+    if (email && entry.email !== email) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    await prisma.waitlistEntry.delete({ where: { id: entryId } });
+    
+    res.json({ message: 'Removed from waitlist successfully' });
+  } catch (error) {
+    console.error('Remove from waitlist error:', error);
+    res.status(500).json({ error: 'Failed to remove from waitlist' });
   }
 });
 

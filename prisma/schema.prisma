@@ -88,6 +88,7 @@ model Timeslot {
   autoPublished      Boolean   @default(false) // Track if already auto-published
   
   registrations Registration[]
+  waitlistEntries WaitlistEntry[]
 }
 
 model Registration {
@@ -106,6 +107,23 @@ model Registration {
   actualCheckInCount Int? // Actual number of people who checked in
 }
 
+model WaitlistEntry {
+  id          String   @id @default(cuid())
+  timeslot    Timeslot @relation(fields: [timeslotId], references: [id])
+  timeslotId  String
+  fullName    String
+  email       String
+  phone       String
+  partySize   Int      @default(1)
+  position    Int      // Position in waitlist (1 = first, 2 = second, etc.)
+  notified    Boolean  @default(false) // Whether user has been notified of availability
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([timeslotId, position])
+  @@index([timeslotId])
+}
+
 model OrganizationConfig {
   id                String   @id @default(cuid())
   organizationName  String   @default("DarshanFlow")
@@ -119,6 +137,7 @@ model OrganizationConfig {
   emailWhitelist    String?
   allowUserRegistration Boolean @default(true)
   maxAttendees      Int      @default(5) // Maximum number of attendees per booking
+  waitlistPercentage Int     @default(10) // Percentage of capacity for waitlist (e.g., 10 = 10%)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
