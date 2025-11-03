@@ -2885,15 +2885,27 @@ Respond in JSON format only.`;
       let responseMessage = `Found ${matchingSlots.length} available slot(s)`;
       
       if (matchingSlots.length > 0) {
-        // Get unique dates from actual slots
+        // Get unique dates from actual slots - handle date objects correctly
         const uniqueDates = [...new Set(matchingSlots.map(slot => {
-          const slotDate = new Date(slot.date);
-          return slotDate.toISOString().split('T')[0];
+          // Handle both Date objects and date strings
+          let slotDate;
+          if (slot.date instanceof Date) {
+            slotDate = slot.date;
+          } else {
+            slotDate = new Date(slot.date);
+          }
+          // Get date only (ignore time) to avoid timezone issues
+          const year = slotDate.getFullYear();
+          const month = slotDate.getMonth();
+          const day = slotDate.getDate();
+          return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         }))];
         
         if (uniqueDates.length === 1) {
-          // Single date - show specific date
-          const dateStr = new Date(uniqueDates[0]).toLocaleDateString('en-US', {
+          // Single date - show specific date using the actual date values
+          const [year, month, day] = uniqueDates[0].split('-').map(Number);
+          const dateObj = new Date(year, month - 1, day); // Use local time to avoid timezone issues
+          const dateStr = dateObj.toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
