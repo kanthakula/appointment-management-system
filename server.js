@@ -677,8 +677,36 @@ app.get('/api/timeslots', async (req, res) => {
       }, 
       orderBy: [{ date: 'asc' }, { start: 'asc' }]
     });
-    res.json(slots);
+    
+    // Get config for waitlist percentage
+    const config = await prisma.organizationConfig.findFirst();
+    const waitlistPercentage = config?.waitlistPercentage ?? 10;
+    
+    // Add waitlist information to each slot
+    const slotsWithWaitlist = await Promise.all(slots.map(async (slot) => {
+      // Calculate waitlist capacity
+      const waitlistCapacity = Math.floor((slot.capacity * waitlistPercentage) / 100);
+      // Ensure at least 1 entry if percentage > 0
+      const finalCapacity = waitlistPercentage > 0 && waitlistCapacity === 0 && (slot.capacity * waitlistPercentage / 100) > 0 
+        ? 1 
+        : waitlistCapacity;
+      
+      // Get current waitlist count
+      const waitlistCount = await prisma.waitlistEntry.count({
+        where: { timeslotId: slot.id }
+      });
+      
+      return {
+        ...slot,
+        waitlistCount,
+        waitlistCapacity: finalCapacity,
+        waitlistFull: waitlistCount >= finalCapacity
+      };
+    }));
+    
+    res.json(slotsWithWaitlist);
   } catch (error) {
+    console.error('Timeslots API error:', error);
     res.status(500).json({ error: 'Failed to load timeslots' });
   }
 });

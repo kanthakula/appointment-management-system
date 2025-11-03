@@ -200,20 +200,48 @@ const HomePage = () => {
                 Reserve Slot
               </Link>
             ) : (
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={fullButtonStyles}>
                   Full / Unavailable
                 </div>
-                <Link
-                  to={`/waitlist/${slot.id}`}
-                  style={{
-                    ...buttonStyles,
-                    backgroundColor: '#DC2626',
-                    border: '2px solid #DC2626'
-                  }}
-                >
-                  Add to Waitlist
-                </Link>
+                {slot.waitlistCapacity > 0 && (
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <Link
+                      to={slot.waitlistFull ? '#' : `/waitlist/${slot.id}`}
+                      onClick={(e) => {
+                        if (slot.waitlistFull) {
+                          e.preventDefault();
+                        }
+                      }}
+                      style={{
+                        ...buttonStyles,
+                        backgroundColor: slot.waitlistFull ? '#9CA3AF' : '#DC2626',
+                        border: `2px solid ${slot.waitlistFull ? '#9CA3AF' : '#DC2626'}`,
+                        cursor: slot.waitlistFull ? 'not-allowed' : 'pointer',
+                        opacity: slot.waitlistFull ? 0.6 : 1,
+                        textDecoration: 'none'
+                      }}
+                    >
+                      {slot.waitlistFull ? 'Waitlist Full' : 'Add to Waitlist'}
+                    </Link>
+                    <span style={{
+                      fontSize: '0.9rem',
+                      color: slot.waitlistFull ? '#DC2626' : '#6B7280',
+                      fontWeight: slot.waitlistFull ? 'bold' : 'normal'
+                    }}>
+                      (Waitlist: {slot.waitlistCount || 0}/{slot.waitlistCapacity || 0})
+                    </span>
+                  </div>
+                )}
+                {(!slot.waitlistCapacity || slot.waitlistCapacity === 0) && (
+                  <div style={{ 
+                    fontSize: '0.9rem', 
+                    color: '#6B7280',
+                    fontStyle: 'italic'
+                  }}>
+                    Waitlist not available
+                  </div>
+                )}
               </div>
             )}
           </div>
