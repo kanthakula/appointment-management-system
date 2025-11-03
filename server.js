@@ -2596,6 +2596,372 @@ app.post('/api/admin/trigger-auto-archive', authMiddleware, adminOrSuperAdminOnl
   }
 });
 
+// ============================================
+// AI-POWERED ENDPOINTS
+// ============================================
+
+const aiService = require('./utils/aiService');
+
+// Smart Slot Recommendations
+// GET /api/slots/recommendations?email=user@example.com
+app.get('/api/slots/recommendations', async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Get available slots
+    const availableSlots = await prisma.timeslot.findMany({
+      where: {
+        published: true,
+        archived: false,
+        date: { gte: new Date() },
+        remaining: { gt: 0 }
+      },
+      orderBy: { date: 'asc' },
+      take: 20
+    });
+
+    if (availableSlots.length === 0) {
+      return res.json({ recommendations: [], message: 'No available slots found' });
+    }
+
+    // Get user's booking history
+    const history = await prisma.registration.findMany({
+      where: { email: email },
+      include: { timeslot: true },
+      orderBy: { createdAt: 'desc' },
+      take: 10
+    });
+
+    // Prepare history summary for AI
+    const historySummary = history.length > 0
+      ? history.map(h => ({
+          date: h.timeslot.date.toISOString().split('T')[0],
+          time: h.timeslot.start,
+          partySize: h.partySize,
+          checkedIn: h.checkedIn
+        }))
+      : [];
+
+    // Prepare available slots for AI
+    const slotsInfo = availableSlots.map(s => ({
+      id: s.id,
+      date: s.date.toISOString().split('T')[0],
+      time: s.start,
+      endTime: s.end || s.start,
+      remaining: s.remaining,
+      capacity: s.capacity
+    }));
+
+    // Generate AI recommendations
+    const prompt = `You are a helpful assistant for an appointment booking system.
+
+Based on this user's booking history, suggest the 3 BEST time slots from the available slots.
+
+User's previous bookings (${historySummary.length} total):
+${historySummary.length > 0 
+  ? historySummary.map(h => `- ${h.date} at ${h.time} (party size: ${h.partySize}, checked in: ${h.checkedIn ? 'yes' : 'no'})`).join('\n')
+  : 'No previous bookings - this is a new user'
+}
+
+Available slots (${slotsInfo.length} total):
+${slotsInfo.map(s => `- ID: ${s.id}, Date: ${s.date}, Time: ${s.time}${s.endTime ? `-${s.endTime}` : ''}, Remaining: ${s.remaining}/${s.capacity}`).join('\n')}
+
+Consider:
+- User's preferred times (if history exists)
+- Convenience (weekends vs weekdays)
+- Availability (prefer slots with more remaining capacity)
+- Similar patterns from their history
+
+Respond in JSON format:
+{
+  "recommendations": [
+    {
+      "slotId": "slot-id-here",
+      "reason": "Brief explanation why this slot is recommended (1-2 sentences)"
+    }
+  ],
+  "summary": "Brief overall summary of the recommendations"
+}`;
+
+    const aiResponse = await aiService.generateJSON(prompt, { model: 'gpt-4o-mini' });
+
+    // Map AI recommendations to actual slots
+    const recommendations = (aiResponse.recommendations || [])
+      .map(rec => {
+        const slot = availableSlots.find(s => s.id === rec.slotId);
+        return slot
+          ? {
+              ...slot,
+              recommendationReason: rec.reason || 'Recommended based on your preferences',
+              aiSummary: aiResponse.summary
+            }
+          : null;
+      })
+      .filter(Boolean)
+      .slice(0, 3);
+
+    // Fallback: if AI didn't return good recommendations, return top 3 slots
+    if (recommendations.length === 0) {
+      const fallback = availableSlots.slice(0, 3).map(s => ({
+        ...s,
+        recommendationReason: 'Recommended slot based on availability',
+        aiSummary: 'Showing available slots'
+      }));
+      return res.json({
+        recommendations: fallback,
+        fallback: true,
+        message: 'AI recommendations unavailable, showing top available slots'
+      });
+    }
+
+    res.json({
+      recommendations,
+      summary: aiResponse.summary,
+      historyCount: history.length
+    });
+  } catch (error) {
+    console.error('AI recommendation error:', error);
+    // Graceful fallback
+    try {
+      const fallback = await prisma.timeslot.findMany({
+        where: {
+          published: true,
+          archived: false,
+          date: { gte: new Date() },
+          remaining: { gt: 0 }
+        },
+        orderBy: { date: 'asc' },
+        take: 3
+      });
+      res.json({
+        recommendations: fallback.map(s => ({
+          ...s,
+          recommendationReason: 'Available slot',
+          fallback: true
+        })),
+        fallback: true,
+        error: 'AI service temporarily unavailable'
+      });
+    } catch (fallbackError) {
+      res.status(500).json({ error: 'Failed to fetch recommendations' });
+    }
+  }
+});
+
+// Natural Language Booking
+// POST /api/booking/natural-language
+app.post('/api/booking/natural-language', async (req, res) => {
+  try {
+    const { message, email } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    // Parse intent using AI
+    const prompt = `Extract booking intent from this user message: "${message}"
+
+Today's date: ${new Date().toISOString().split('T')[0]}
+
+Return JSON with:
+- action: "book" | "cancel" | "find" | "modify" | "check"
+- date: actual date in YYYY-MM-DD format. If user says "tomorrow", calculate tomorrow's date. If "next sunday", calculate next Sunday's date. If "this weekend", use next Saturday. If relative date like "next week", calculate it.
+- time: preferred time as "morning" (before 12:00), "afternoon" (12:00-17:00), "evening" (after 17:00), or specific time like "14:00" if mentioned
+- partySize: number if mentioned, otherwise null
+- urgency: "high" | "medium" | "low" based on language used
+
+Examples:
+- "Book me for next Sunday afternoon for 3 people" → {"action": "book", "date": "2025-11-09", "time": "afternoon", "partySize": 3, "urgency": "medium"}
+- "I need to cancel my booking" → {"action": "cancel", "date": null, "time": null, "partySize": null, "urgency": "high"}
+- "Find me slots tomorrow morning" → {"action": "find", "date": "2025-11-03", "time": "morning", "partySize": null, "urgency": "medium"}
+
+Respond in JSON format only.`;
+
+    const intent = await aiService.generateJSON(prompt, { model: 'gpt-4o-mini' });
+
+    // Handle different actions
+    if (intent.action === 'cancel' && email) {
+      // Find user's upcoming bookings
+      const bookings = await prisma.registration.findMany({
+        where: {
+          email: email,
+          checkedIn: false
+        },
+        include: {
+          timeslot: {
+            where: {
+              date: { gte: new Date() }
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+
+      return res.json({
+        intent,
+        message: `Found ${bookings.length} upcoming booking(s)`,
+        bookings: bookings.map(b => ({
+          id: b.id,
+          date: b.timeslot.date.toISOString().split('T')[0],
+          time: b.timeslot.start,
+          partySize: b.partySize
+        }))
+      });
+    }
+
+    if (intent.action === 'find' || intent.action === 'book') {
+      // Build date filter
+      let dateFilter = {};
+      if (intent.date) {
+        const targetDate = new Date(intent.date);
+        dateFilter = {
+          date: {
+            gte: new Date(targetDate.setHours(0, 0, 0, 0)),
+            lt: new Date(targetDate.setHours(23, 59, 59, 999))
+          }
+        };
+      } else {
+        dateFilter = { date: { gte: new Date() } };
+      }
+
+      // Build time filter
+      let timeFilter = {};
+      if (intent.time) {
+        if (intent.time === 'morning') {
+          timeFilter = { start: { lte: '12:00' } };
+        } else if (intent.time === 'afternoon') {
+          timeFilter = { start: { gte: '12:00', lte: '17:00' } };
+        } else if (intent.time === 'evening') {
+          timeFilter = { start: { gte: '17:00' } };
+        } else if (intent.time.match(/^\d{2}:\d{2}$/)) {
+          // Specific time like "14:00"
+          timeFilter = { start: intent.time };
+        }
+      }
+
+      // Find matching slots
+      const matchingSlots = await prisma.timeslot.findMany({
+        where: {
+          published: true,
+          archived: false,
+          remaining: { gt: 0 },
+          ...dateFilter,
+          ...timeFilter
+        },
+        orderBy: { date: 'asc' },
+        take: 10
+      });
+
+      // Generate friendly response
+      let responseMessage = `Found ${matchingSlots.length} available slot(s)`;
+      if (intent.date) {
+        const dateStr = new Date(intent.date).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        responseMessage += ` for ${dateStr}`;
+      }
+      if (intent.time) {
+        responseMessage += ` in the ${intent.time}`;
+      }
+
+      return res.json({
+        intent,
+        matchingSlots,
+        message: responseMessage,
+        canBook: matchingSlots.length > 0
+      });
+    }
+
+    res.json({
+      intent,
+      message: 'I understood your request. How can I help you?',
+      supportedActions: ['book', 'cancel', 'find', 'modify', 'check']
+    });
+  } catch (error) {
+    console.error('Natural language booking error:', error);
+    res.status(500).json({
+      error: 'Failed to process your request. Please try rephrasing or use the standard booking form.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// AI-Powered Email Generation
+// POST /api/ai/generate-email
+app.post('/api/ai/generate-email', async (req, res) => {
+  try {
+    const { type, bookingData } = req.body;
+
+    if (!type || !bookingData) {
+      return res.status(400).json({ error: 'Type and bookingData are required' });
+    }
+
+    const templates = {
+      confirmation: `Write a warm, welcoming confirmation email for ${bookingData.name || 'valued visitor'} 
+        who has booked an appointment on ${bookingData.date || 'the selected date'} at ${bookingData.time || 'the selected time'}. 
+        Include details about:
+        - Appointment date and time
+        - Party size: ${bookingData.partySize || 1} ${bookingData.partySize === 1 ? 'person' : 'people'}
+        - QR code for check-in (mention it will be sent separately or shown on confirmation page)
+        - Any special instructions or reminders
+        - Contact information for changes
+        
+        Keep it friendly, professional, and concise (2-3 short paragraphs).`,
+      
+      reminder: `Write a friendly reminder email for ${bookingData.name || 'valued visitor'} 
+        reminding them about their upcoming appointment on ${bookingData.date || 'the date'} at ${bookingData.time || 'the time'}.
+        Party size: ${bookingData.partySize || 1}
+        Send this 24 hours before the appointment.
+        Keep it brief and helpful (1-2 paragraphs).`,
+      
+      cancellation: `Write a professional cancellation confirmation email for ${bookingData.name || 'valued visitor'}
+        confirming that their appointment for ${bookingData.date || 'the date'} at ${bookingData.time || 'the time'} has been cancelled.
+        Include information about rebooking if they wish.
+        Keep it brief and courteous (1-2 paragraphs).`,
+      
+      waitlist: `Write a friendly waitlist notification email for ${bookingData.name || 'valued visitor'}
+        letting them know that a slot has become available for ${bookingData.date || 'the date'} at ${bookingData.time || 'the time'}.
+        Encourage them to book quickly as availability is limited.
+        Keep it urgent but friendly (1-2 paragraphs).`
+    };
+
+    const prompt = templates[type] || templates.confirmation;
+    const fullPrompt = `${prompt}\n\nBooking details: ${JSON.stringify(bookingData, null, 2)}`;
+
+    const emailContent = await aiService.generate(fullPrompt, {
+      model: 'gpt-4o-mini',
+      temperature: 0.8,
+      max_tokens: 500
+    });
+
+    res.json({
+      emailContent,
+      type,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('AI email generation error:', error);
+    res.status(500).json({ error: 'Failed to generate email content' });
+  }
+});
+
+// AI Usage Stats (for admin)
+// GET /api/ai/stats
+app.get('/api/ai/stats', adminOnly, async (req, res) => {
+  try {
+    const stats = aiService.getUsageStats();
+    res.json(stats);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch AI stats' });
+  }
+});
+
 // Serve React app for all non-API routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
