@@ -1195,9 +1195,15 @@ app.put('/api/admin/timeslots/:id/publish', authMiddleware, adminOnly, async (re
       }
     }
     
+    // Update data: if publishing, also unarchive the slot
+    const updateData = { published: publish };
+    if (publish) {
+      updateData.archived = false; // Automatically unarchive when publishing
+    }
+    
     const timeslot = await prisma.timeslot.update({ 
       where: { id: req.params.id }, 
-      data: { published: publish } 
+      data: updateData
     });
     
     // Log the action
