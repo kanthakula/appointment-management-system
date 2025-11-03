@@ -347,7 +347,8 @@ app.get('/api/config/theme', async (req, res) => {
           backgroundColor: '#F9FAFB',
           textColor: '#111827',
           timezone: 'America/Chicago',
-          maxAttendees: 5
+          maxAttendees: 5,
+          waitlistPercentage: 10
         }
       });
     }
@@ -384,25 +385,35 @@ app.put('/api/config/theme', authMiddleware, adminOnly, async (req, res) => {
         }
       });
     } else {
+      // Build update data object, only including fields that are provided
+      const updateData = {};
+      if (organizationName !== undefined) updateData.organizationName = organizationName;
+      if (primaryColor !== undefined) updateData.primaryColor = primaryColor;
+      if (secondaryColor !== undefined) updateData.secondaryColor = secondaryColor;
+      if (accentColor !== undefined) updateData.accentColor = accentColor;
+      if (backgroundColor !== undefined) updateData.backgroundColor = backgroundColor;
+      if (textColor !== undefined) updateData.textColor = textColor;
+      if (timezone !== undefined) updateData.timezone = timezone;
+      if (emailWhitelist !== undefined) updateData.emailWhitelist = emailWhitelist;
+      if (allowUserRegistration !== undefined) updateData.allowUserRegistration = allowUserRegistration;
+      if (parsedMaxAttendees !== undefined) updateData.maxAttendees = parsedMaxAttendees;
+      if (parsedWaitlistPercentage !== undefined) {
+        updateData.waitlistPercentage = parsedWaitlistPercentage;
+        console.log(`Updating waitlistPercentage to: ${parsedWaitlistPercentage}`);
+      }
+      
       config = await prisma.organizationConfig.update({
         where: { id: config.id },
-        data: {
-          organizationName: organizationName !== undefined ? organizationName : config.organizationName,
-          primaryColor: primaryColor !== undefined ? primaryColor : config.primaryColor,
-          secondaryColor: secondaryColor !== undefined ? secondaryColor : config.secondaryColor,
-          accentColor: accentColor !== undefined ? accentColor : config.accentColor,
-          backgroundColor: backgroundColor !== undefined ? backgroundColor : config.backgroundColor,
-          textColor: textColor !== undefined ? textColor : config.textColor,
-          timezone: timezone !== undefined ? timezone : config.timezone,
-          emailWhitelist: emailWhitelist !== undefined ? emailWhitelist : config.emailWhitelist,
-          allowUserRegistration: allowUserRegistration !== undefined ? allowUserRegistration : config.allowUserRegistration,
-          maxAttendees: parsedMaxAttendees !== undefined ? parsedMaxAttendees : config.maxAttendees,
-          waitlistPercentage: parsedWaitlistPercentage !== undefined ? parsedWaitlistPercentage : config.waitlistPercentage
-        }
+        data: updateData
       });
+      
+      console.log(`Config updated. waitlistPercentage is now: ${config.waitlistPercentage}`);
     }
     
-    res.json(config);
+    // Fetch updated config to return
+    const updatedConfig = await prisma.organizationConfig.findFirst();
+    console.log(`Returning config with waitlistPercentage: ${updatedConfig?.waitlistPercentage}`);
+    res.json(updatedConfig);
   } catch (error) {
     console.error('Theme update error:', error);
     res.status(500).json({ error: 'Failed to update theme' });
