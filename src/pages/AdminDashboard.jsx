@@ -328,6 +328,9 @@ const AdminDashboard = () => {
                   }}
                   onClick={() => {
                     setActiveTab('timeslots')
+                    // Set filter to show only slots with waitlist entries
+                    const event = new CustomEvent('filterTimeslots', { detail: { filter: 'waitlist' } })
+                    window.dispatchEvent(event)
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.transform = 'translateY(-4px)'

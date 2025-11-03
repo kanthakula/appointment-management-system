@@ -326,6 +326,11 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
     if (statusFilter !== 'all') {
       if (statusFilter === 'published' && (!timeslot.published || timeslot.archived)) return false
       if (statusFilter === 'draft' && (timeslot.published || timeslot.archived)) return false
+      if (statusFilter === 'waitlist') {
+        // Show only slots that have waitlist entries
+        const waitlistCount = timeslot.waitlist?.count || 0;
+        if (waitlistCount === 0) return false
+      }
       if (statusFilter === 'auto-archive') {
         // Show unpublished slots that are past their date
         if (timeslot.published || timeslot.archived) return false
@@ -634,6 +639,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                     <option value="all">All Slots</option>
                     <option value="published">Published</option>
                     <option value="draft">Draft</option>
+                    <option value="waitlist">Has Waitlist</option>
                     <option value="auto-archive">Will Auto-Archive</option>
                     <option value="archived">All Archived</option>
                     <option value="auto-archived">Auto-Archived</option>
