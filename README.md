@@ -106,8 +106,8 @@ Key principles:
 
 4. **Access the Application**
 
-- **Main Site**: http://localhost:3000
-- **Admin Panel**: http://localhost:3000/admin
+- **Main Site**: http://localhost:3002
+- **Admin Panel**: http://localhost:3002/admin
 - **Default Admin Login**:
   - Email: `admin@darshanflow.com`
   - Password: `admin123`
@@ -251,7 +251,7 @@ Jobs log to the server console with detailed traces for debugging.
 Login (admin):
 
 ```bash
-curl -i -X POST http://localhost:3000/api/auth/login \
+curl -i -X POST http://localhost:3002/api/auth/login \
   -H 'Content-Type: application/json' \
   -d '{"email":"admin@example.com","password":"pass"}'
 ```
@@ -259,7 +259,7 @@ curl -i -X POST http://localhost:3000/api/auth/login \
 Create timeslot:
 
 ```bash
-curl -i -X POST http://localhost:3000/api/admin/timeslots \
+curl -i -X POST http://localhost:3002/api/admin/timeslots \
   -H 'Content-Type: application/json' --cookie "token=..." \
   -d '{"date":"2025-11-01","start":"08:05","end":"10:05","capacity":50,"published":false}'
 ```
@@ -267,7 +267,7 @@ curl -i -X POST http://localhost:3000/api/admin/timeslots \
 Publish timeslot (will fail if past by org timezone):
 
 ```bash
-curl -i -X PUT http://localhost:3000/api/admin/timeslots/<id>/publish \
+curl -i -X PUT http://localhost:3002/api/admin/timeslots/<id>/publish \
   -H 'Content-Type: application/json' --cookie "token=..." \
   -d '{"publish":true}'
 ```
@@ -275,7 +275,7 @@ curl -i -X PUT http://localhost:3000/api/admin/timeslots/<id>/publish \
 Book slot (server enforces `maxAttendees`):
 
 ```bash
-curl -i -X POST http://localhost:3000/api/register/<timeslotId> \
+curl -i -X POST http://localhost:3002/api/register/<timeslotId> \
   -H 'Content-Type: application/json' \
   -d '{"name":"Alex","email":"a@e.com","phone":"123","partySize":3}'
 ```
@@ -320,7 +320,7 @@ JWT_SECRET=your-secret-key
 EMAIL_HOST=smtp.gmail.com
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
-PORT=3000
+PORT=3002
 ```
 
 2. **Database Migration**
@@ -345,7 +345,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 COPY . .
 RUN npm run build
-EXPOSE 3000
+EXPOSE 3002
 CMD ["npm", "start"]
 ```
 
@@ -384,7 +384,7 @@ For support and questions:
 
 ## 🧭 Troubleshooting
 
-1. Address already in use (EADDRINUSE: :::3000)
+1. Address already in use (EADDRINUSE: :::3002)
 
 - A previous server is running. Kill and restart:
 

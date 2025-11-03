@@ -1,0 +1,1184 @@
+
+> darshanflow-app@1.0.0 server
+> node server.js
+
+=== Startup: Checking for published past-dated slots ===
+HTTP Server listening on 3000
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+✅ No published past-dated slots found
+Auth middleware - Token present: false
+Auth middleware - Cookies: []
+Auth middleware - No token provided
+Auth middleware - Token present: true
+Auth middleware - Cookies: [ 'token' ]
+Auth middleware - Token valid for user: akuladatta@gmail.com
+Auth middleware - Token present: true
+Auth middleware - Cookies: [ 'token' ]
+Auth middleware - Token valid for user: akuladatta@gmail.com
+Auth middleware - Token present: true
+Auth middleware - Cookies: [ 'token' ]
+Auth middleware - Token valid for user: akuladatta@gmail.com
+Auth middleware - Token present: false
+Auth middleware - Cookies: []
+Auth middleware - No token provided
+Auth middleware - Token present: false
+Auth middleware - Cookies: []
+Auth middleware - No token provided
+Auth middleware - Token present: false
+Auth middleware - Cookies: []
+Auth middleware - No token provided
+Auth middleware - Token present: false
+Auth middleware - Cookies: []
+Auth middleware - No token provided
+Auth middleware - Token present: true
+Auth middleware - Cookies: [ 'token' ]
+Auth middleware - Token valid for user: akuladatta@gmail.com
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auth middleware - Token present: false
+Auth middleware - Cookies: [ 'ajs_anonymous_id', 'sidebar:state', '_streamlit_xsrf' ]
+Auth middleware - No token provided
+Auth middleware - Token present: false
+Auth middleware - Cookies: []
+Auth middleware - No token provided
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auth middleware - Token present: true
+Auth middleware - Cookies: [ 'token' ]
+Auth middleware - Token valid for user: akuladatta@gmail.com
+Auth middleware - Token present: true
+Auth middleware - Cookies: [ 'token' ]
+Auth middleware - Token valid for user: akuladatta@gmail.com
+Auth middleware - Token present: true
+Auth middleware - Cookies: [ 'token' ]
+Auth middleware - Token valid for user: akuladatta@gmail.com
+Auth middleware - Token present: true
+Auth middleware - Cookies: [ 'token' ]
+Auth middleware - Token valid for user: akuladatta@gmail.com
+Direct logout page accessed
+Auth middleware - Token present: false
+Auth middleware - Cookies: []
+Auth middleware - No token provided
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Error: ENOENT: no such file or directory, stat '/Users/sakula/Library/CloudStorage/GoogleDrive-srikanth.akula@gmail.com/My Drive/1 1 AA ChatGPT/Raj Classes/AppointmentApp/dist/index.html'
+Error: ENOENT: no such file or directory, stat '/Users/sakula/Library/CloudStorage/GoogleDrive-srikanth.akula@gmail.com/My Drive/1 1 AA ChatGPT/Raj Classes/AppointmentApp/dist/index.html'
+Error: ENOENT: no such file or directory, stat '/Users/sakula/Library/CloudStorage/GoogleDrive-srikanth.akula@gmail.com/My Drive/1 1 AA ChatGPT/Raj Classes/AppointmentApp/dist/index.html'
+Error: ENOENT: no such file or directory, stat '/Users/sakula/Library/CloudStorage/GoogleDrive-srikanth.akula@gmail.com/My Drive/1 1 AA ChatGPT/Raj Classes/AppointmentApp/dist/index.html'
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Error: ENOENT: no such file or directory, stat '/Users/sakula/Library/CloudStorage/GoogleDrive-srikanth.akula@gmail.com/My Drive/1 1 AA ChatGPT/Raj Classes/AppointmentApp/dist/index.html'
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Slot date 2025-11-01 is in the future
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 0 (0:00), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 60 (1:00), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 120 (2:00), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 188 (3:08), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 240 (4:00), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 300 (5:00), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 360 (6:00), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 420 (7:00), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 488 (8:08), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 540 (9:00), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 602 (10:02), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 660 (11:00), Slot time: 664 (11:04), IsPast: false
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Timezone check (America/Chicago): Same date 2025-11-01, Current time: 728 (12:08), Slot time: 664 (11:04), IsPast: true
+Found 1 slots to archive (both published and unpublished)
+Slot to archive: cmhdm8476000sitytdya0i81x - Date: 2025-11-01, Published: true, Archived: false
+Auto-archived slot cmhdm8476000sitytdya0i81x: 2025-11-01 11:04 (was published)
+Auto-archived 1 slots (both published and unpublished)
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Auto-publish job running
+Reminder job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Auto-publish job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Auto-publish job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Auto-publish job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Auto-publish job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Reminder job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Reminder job running
+Auto-archive job running
+Auto-archive: Checking for slots with timezone awareness
+Auto-publish job running
+Found 0 slots to archive (both published and unpublished)
+No slots found to auto-archive
+Error: ENOENT: no such file or directory, stat '/Users/sakula/Library/CloudStorage/GoogleDrive-srikanth.akula@gmail.com/My Drive/1 1 AA ChatGPT/Raj Classes/AppointmentApp/dist/index.html'
+Auto-publish job running
+Error: ENOENT: no such file or directory, stat '/Users/sakula/Library/CloudStorage/GoogleDrive-srikanth.akula@gmail.com/My Drive/1 1 AA ChatGPT/Raj Classes/AppointmentApp/dist/index.html'
+Error: ENOENT: no such file or directory, stat '/Users/sakula/Library/CloudStorage/GoogleDrive-srikanth.akula@gmail.com/My Drive/1 1 AA ChatGPT/Raj Classes/AppointmentApp/dist/index.html'
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running
+Auto-publish job running

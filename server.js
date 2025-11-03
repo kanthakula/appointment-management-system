@@ -78,12 +78,18 @@ app.use(cors({
     // List of allowed origins
     const allowedOrigins = [
       'http://localhost:3000',
-      'http://localhost:3001', 
+      'http://localhost:3001',
+      'http://localhost:3002',
       'https://localhost:3000',
+      'https://localhost:3002',
       'https://192.168.1.102:3000',
+      'https://192.168.1.102:3002',
       'http://192.168.1.102:3000',
+      'http://192.168.1.102:3002',
       'http://127.0.0.1:3000',
-      'https://127.0.0.1:3000'
+      'http://127.0.0.1:3002',
+      'https://127.0.0.1:3000',
+      'https://127.0.0.1:3002'
     ];
     
     if (allowedOrigins.includes(origin)) {

@@ -2,7 +2,7 @@
 
 This guide walks through the main UI screens and typical flows for demos, UAT, and onboarding.
 
-> Tip: Use Incognito window to avoid stale caches. Admin panel: `http://localhost:3000/admin`
+> Tip: Use Incognito window to avoid stale caches. Admin panel: `http://localhost:3002/admin`
 
 ---
 
@@ -31,7 +31,7 @@ This guide walks through the main UI screens and typical flows for demos, UAT, a
 
 ![Login](images/login.png)
 
-- Navigate to `http://localhost:3000/admin`
+- Navigate to `http://localhost:3002/admin`
 - If not authenticated, redirected to Login
 - Enter admin credentials → lands on Admin Dashboard
 
