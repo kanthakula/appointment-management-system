@@ -360,10 +360,11 @@ app.get('/api/config/theme', async (req, res) => {
 
 app.put('/api/config/theme', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { organizationName, primaryColor, secondaryColor, accentColor, backgroundColor, textColor, timezone, emailWhitelist, allowUserRegistration, maxAttendees } = req.body;
+    const { organizationName, primaryColor, secondaryColor, accentColor, backgroundColor, textColor, timezone, emailWhitelist, allowUserRegistration, maxAttendees, waitlistPercentage } = req.body;
     
-    // Parse maxAttendees as integer
+    // Parse maxAttendees and waitlistPercentage as integers
     const parsedMaxAttendees = maxAttendees !== undefined ? parseInt(maxAttendees, 10) : undefined;
+    const parsedWaitlistPercentage = waitlistPercentage !== undefined ? parseInt(waitlistPercentage, 10) : undefined;
     
     let config = await prisma.organizationConfig.findFirst();
     if (!config) {
@@ -378,7 +379,8 @@ app.put('/api/config/theme', authMiddleware, adminOnly, async (req, res) => {
           timezone: timezone || 'America/Chicago',
           emailWhitelist: emailWhitelist || null,
           allowUserRegistration: allowUserRegistration !== undefined ? allowUserRegistration : false,
-          maxAttendees: parsedMaxAttendees !== undefined ? parsedMaxAttendees : 5
+          maxAttendees: parsedMaxAttendees !== undefined ? parsedMaxAttendees : 5,
+          waitlistPercentage: parsedWaitlistPercentage !== undefined ? parsedWaitlistPercentage : 10
         }
       });
     } else {
