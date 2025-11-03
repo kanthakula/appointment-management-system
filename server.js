@@ -2785,24 +2785,29 @@ Respond in JSON format only.`;
     // Handle different actions
     if (intent.action === 'cancel' && email) {
       // Find user's upcoming bookings
-      const bookings = await prisma.registration.findMany({
+      const allBookings = await prisma.registration.findMany({
         where: {
           email: email,
           checkedIn: false
         },
         include: {
-          timeslot: {
-            where: {
-              date: { gte: new Date() }
-            }
-          }
+          timeslot: true
         },
         orderBy: { createdAt: 'desc' }
       });
 
+      // Filter for future bookings
+      const bookings = allBookings.filter(b => {
+        const slotDate = new Date(b.timeslot.date);
+        const slotDateTime = new Date(`${slotDate.toISOString().split('T')[0]}T${b.timeslot.start}`);
+        return slotDateTime >= new Date();
+      });
+
       return res.json({
         intent,
-        message: `Found ${bookings.length} upcoming booking(s)`,
+        message: bookings.length > 0 
+          ? `Found ${bookings.length} upcoming booking(s)`
+          : 'No upcoming bookings found for cancellation',
         bookings: bookings.map(b => ({
           id: b.id,
           date: b.timeslot.date.toISOString().split('T')[0],
