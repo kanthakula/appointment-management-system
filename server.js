@@ -396,7 +396,8 @@ app.put('/api/config/theme', authMiddleware, adminOnly, async (req, res) => {
           timezone: timezone !== undefined ? timezone : config.timezone,
           emailWhitelist: emailWhitelist !== undefined ? emailWhitelist : config.emailWhitelist,
           allowUserRegistration: allowUserRegistration !== undefined ? allowUserRegistration : config.allowUserRegistration,
-          maxAttendees: parsedMaxAttendees !== undefined ? parsedMaxAttendees : config.maxAttendees
+          maxAttendees: parsedMaxAttendees !== undefined ? parsedMaxAttendees : config.maxAttendees,
+          waitlistPercentage: parsedWaitlistPercentage !== undefined ? parsedWaitlistPercentage : config.waitlistPercentage
         }
       });
     }
