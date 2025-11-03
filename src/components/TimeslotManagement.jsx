@@ -1102,7 +1102,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                     display: 'inline-block', 
                     marginRight: '1rem',
                     padding: '0.25rem 0.5rem',
-                    backgroundColor: '#0EA5E9',
+                    backgroundColor: statusFilter === 'waitlist' ? '#DC2626' : '#0EA5E9',
                     color: 'white',
                     borderRadius: '4px'
                   }}>
