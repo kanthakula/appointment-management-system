@@ -1106,7 +1106,15 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                     color: 'white',
                     borderRadius: '4px'
                   }}>
-                    📊 Status: {statusFilter === 'published' ? 'Published' : statusFilter === 'draft' ? 'Draft' : statusFilter === 'archived' ? 'All Archived' : statusFilter === 'auto-archived' ? 'Auto-Archived' : statusFilter === 'admin-archived' ? 'Admin Archived' : 'Will Auto-Archive'}
+                    📊 Status: {
+                      statusFilter === 'published' ? 'Published' : 
+                      statusFilter === 'draft' ? 'Draft' : 
+                      statusFilter === 'waitlist' ? 'Has Waitlist' :
+                      statusFilter === 'archived' ? 'All Archived' : 
+                      statusFilter === 'auto-archived' ? 'Auto-Archived' : 
+                      statusFilter === 'admin-archived' ? 'Admin Archived' : 
+                      'Will Auto-Archive'
+                    }
                   </span>
                 )}
               </div>
@@ -1374,7 +1382,15 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
             <strong>Showing {filteredTimeslots.length} of {timeslots.length} time slots</strong>
             {(statusFilter !== 'all' || dateFilter || dateRangeFilter !== 'all') && (
               <span> - Filtered by: 
-                {statusFilter !== 'all' && <strong> {statusFilter === 'published' ? 'Published' : statusFilter === 'draft' ? 'Draft' : statusFilter === 'archived' ? 'All Archived' : statusFilter === 'auto-archived' ? 'Auto-Archived' : statusFilter === 'admin-archived' ? 'Admin Archived' : 'Will Auto-Archive'}</strong>}
+                {statusFilter !== 'all' && <strong> {
+                  statusFilter === 'published' ? 'Published' : 
+                  statusFilter === 'draft' ? 'Draft' : 
+                  statusFilter === 'waitlist' ? 'Has Waitlist' :
+                  statusFilter === 'archived' ? 'All Archived' : 
+                  statusFilter === 'auto-archived' ? 'Auto-Archived' : 
+                  statusFilter === 'admin-archived' ? 'Admin Archived' : 
+                  'Will Auto-Archive'
+                }</strong>}
                 {dateFilter && <strong> Date: {(() => {
                   const filterDate = new Date(dateFilter + 'T00:00:00')
                   return filterDate.toLocaleDateString()
