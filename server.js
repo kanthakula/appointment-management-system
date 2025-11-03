@@ -1357,10 +1357,20 @@ async function getWaitlistCapacity(timeslotId) {
   if (!timeslot) return 0;
   
   const config = await prisma.organizationConfig.findFirst();
-  const waitlistPercentage = config?.waitlistPercentage || 10;
+  // Use nullish coalescing to handle null/undefined, default to 10
+  const waitlistPercentage = config?.waitlistPercentage ?? 10;
   
   // Calculate waitlist capacity: percentage of total capacity
-  return Math.floor((timeslot.capacity * waitlistPercentage) / 100);
+  // For small capacities, ensure at least 1 entry if percentage > 0
+  const calculated = (timeslot.capacity * waitlistPercentage) / 100;
+  const capacity = Math.floor(calculated);
+  
+  // If percentage > 0 and capacity is 0 but calculated > 0, allow at least 1
+  if (waitlistPercentage > 0 && capacity === 0 && calculated > 0) {
+    return 1;
+  }
+  
+  return capacity;
 }
 
 // Helper function to promote waitlist entries when slots become available
@@ -1480,10 +1490,13 @@ app.post('/api/waitlist/:timeslotId', async (req, res) => {
       where: { timeslotId }
     });
     
+    // Get waitlist percentage for error message
+    const waitlistPercentage = config?.waitlistPercentage ?? 10;
+    
     // Check if waitlist is full
     if (currentWaitlistCount >= waitlistCapacity) {
       return res.status(400).json({ 
-        error: `Waitlist is full. Maximum ${waitlistCapacity} entries allowed (${config?.waitlistPercentage || 10}% of capacity).` 
+        error: `Waitlist is full. Maximum ${waitlistCapacity} entries allowed (${waitlistPercentage}% of capacity).` 
       });
     }
     
