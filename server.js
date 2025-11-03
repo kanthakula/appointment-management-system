@@ -1244,6 +1244,81 @@ app.put('/api/admin/timeslots/:id', authMiddleware, adminOnly, async (req, res) 
     const day = parseInt(dateParts[2]);
     const correctDate = new Date(year, month, day);
     
+    // Get the existing timeslot to check its status
+    const existingTimeslot = await prisma.timeslot.findUnique({
+      where: { id: req.params.id },
+      include: {
+        registrations: {
+          select: { id: true }
+        },
+        waitlistEntries: {
+          select: { id: true }
+        }
+      }
+    });
+    
+    if (!existingTimeslot) {
+      return res.status(404).json({ error: 'Timeslot not found' });
+    }
+    
+    // Check if this is an archived slot with bookings/waitlist being moved to future date
+    const hasBookings = existingTimeslot.registrations.length > 0;
+    const hasWaitlist = existingTimeslot.waitlistEntries.length > 0;
+    const isArchived = existingTimeslot.archived;
+    const isMovingToFuture = !(await isPastDateInUserTimezone(correctDate, start));
+    const originalDate = new Date(existingTimeslot.date);
+    const isDateChanging = originalDate.toISOString().split('T')[0] !== correctDate.toISOString().split('T')[0];
+    
+    // If archived slot with bookings/waitlist is being moved to future, create a copy instead
+    if (isArchived && (hasBookings || hasWaitlist) && isMovingToFuture && isDateChanging) {
+      // Create a new copy of the slot with the new date
+      const autoPublishData = {};
+      if (autoPublishEnabled) {
+        autoPublishData.autoPublishEnabled = true;
+        autoPublishData.autoPublishType = autoPublishType;
+        if (autoPublishType === 'scheduled' && autoPublishDateTime) {
+          autoPublishData.autoPublishDateTime = new Date(autoPublishDateTime);
+        } else if (autoPublishType === 'hours_before' && autoPublishHoursBefore) {
+          autoPublishData.autoPublishHoursBefore = parseInt(autoPublishHoursBefore);
+        }
+      } else {
+        autoPublishData.autoPublishEnabled = false;
+        autoPublishData.autoPublishType = null;
+        autoPublishData.autoPublishDateTime = null;
+        autoPublishData.autoPublishHoursBefore = null;
+      }
+      
+      const newTimeslot = await prisma.timeslot.create({
+        data: {
+          date: correctDate,
+          start,
+          end: end || '',
+          capacity: cap,
+          remaining: cap, // Reset count for new slot
+          published: publish ? true : false,
+          archived: false, // New slot is not archived
+          archivedBy: null,
+          ...autoPublishData
+        }
+      });
+      
+      // Log the copy action
+      await prisma.auditLog.create({
+        data: {
+          action: 'COPY_TIMESLOT',
+          details: `Created copy of archived timeslot (ID: ${existingTimeslot.id}) to future date: ${correctDate.toISOString().slice(0,10)} ${start}-${end||'N/A'}. Original slot preserved with ${hasBookings ? existingTimeslot.registrations.length + ' bookings' : ''}${hasBookings && hasWaitlist ? ' and ' : ''}${hasWaitlist ? existingTimeslot.waitlistEntries.length + ' waitlist entries' : ''} for reporting.`,
+          performedBy: req.user.id
+        }
+      });
+      
+      return res.json({
+        ...newTimeslot,
+        isCopy: true,
+        originalSlotId: existingTimeslot.id,
+        message: `Slot copied successfully. Original archived slot preserved with ${hasBookings ? existingTimeslot.registrations.length + ' bookings' : ''}${hasBookings && hasWaitlist ? ' and ' : ''}${hasWaitlist ? existingTimeslot.waitlistEntries.length + ' waitlist entries' : ''} for reporting.`
+      });
+    }
+    
     // If trying to publish, check if the slot date is in the past using timezone-aware comparison
     if (publish) {
       if (await isPastDateInUserTimezone(correctDate, start)) {
