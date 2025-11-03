@@ -22,7 +22,9 @@ const AdminDashboard = () => {
     publishedSlots: 0,
     totalBookings: 0,
     totalCheckIns: 0,
-    totalCheckedInCapacity: 0
+    totalCheckedInCapacity: 0,
+    totalWaitlistEntries: 0,
+    totalWaitlistPeople: 0
   })
   const [recentActivity, setRecentActivity] = useState({
     recentBookings: [],
@@ -316,6 +318,36 @@ const AdminDashboard = () => {
                     ({stats.totalCheckedInCapacity} people)
                   </div>
                   <div style={{ fontSize: '0.7rem', color: '#6B7280', marginTop: '0.5rem' }}>Click to filter →</div>
+                </div>
+                <div
+                  style={{
+                    ...statCardStyles,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    border: `2px solid transparent`
+                  }}
+                  onClick={() => {
+                    setActiveTab('timeslots')
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-4px)'
+                    e.target.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)'
+                    e.target.style.borderColor = '#DC2626'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)'
+                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'
+                    e.target.style.borderColor = 'transparent'
+                  }}
+                >
+                  <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#DC2626' }}>
+                    {stats.totalWaitlistEntries}
+                  </div>
+                  <div style={{ color: theme.textColor }}>Waitlist Entries</div>
+                  <div style={{ fontSize: '0.9rem', color: '#DC2626', fontWeight: 'bold', marginTop: '0.25rem' }}>
+                    ({stats.totalWaitlistPeople} people)
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#6B7280', marginTop: '0.5rem' }}>Click to view →</div>
                 </div>
       </div>
 

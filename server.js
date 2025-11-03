@@ -1026,13 +1026,23 @@ app.get('/api/admin/timeslots', authMiddleware, adminOnly, async (req, res) => {
             partySize: true,
             actualCheckInCount: true
           }
+        },
+        waitlistEntries: {
+          select: {
+            id: true,
+            partySize: true
+          }
         }
       },
       orderBy: [{ date: 'asc' }, { start: 'asc' }] 
     });
     
-    // Calculate check-in statistics for each slot
-    const slotsWithStats = slots.map(slot => {
+    // Get config for waitlist percentage
+    const config = await prisma.organizationConfig.findFirst();
+    const waitlistPercentage = config?.waitlistPercentage ?? 10;
+    
+    // Calculate check-in statistics and waitlist info for each slot
+    const slotsWithStats = await Promise.all(slots.map(async (slot) => {
       const totalBookings = slot.registrations.length;
       const totalCheckedIn = slot.registrations.filter(reg => reg.checkedIn).length;
       const totalPeopleBooked = slot.registrations.reduce((sum, reg) => sum + reg.partySize, 0);
@@ -1040,16 +1050,33 @@ app.get('/api/admin/timeslots', authMiddleware, adminOnly, async (req, res) => {
         .filter(reg => reg.checkedIn)
         .reduce((sum, reg) => sum + (reg.actualCheckInCount || reg.partySize), 0);
       
+      // Calculate waitlist capacity
+      const waitlistCapacity = Math.floor((slot.capacity * waitlistPercentage) / 100);
+      const finalWaitlistCapacity = waitlistPercentage > 0 && waitlistCapacity === 0 && (slot.capacity * waitlistPercentage / 100) > 0 
+        ? 1 
+        : waitlistCapacity;
+      
+      // Get waitlist count and people
+      const waitlistCount = slot.waitlistEntries?.length || 0;
+      const waitlistPeople = slot.waitlistEntries?.reduce((sum, entry) => sum + entry.partySize, 0) || 0;
+      
       return {
         ...slot,
         stats: {
           totalBookings,
           totalCheckedIn,
           totalPeopleBooked,
-          totalPeopleCheckedIn
+          totalPeopleCheckedIn,
+          checkInRate: totalBookings > 0 ? ((totalCheckedIn / totalBookings) * 100).toFixed(1) : 0
+        },
+        waitlist: {
+          count: waitlistCount,
+          capacity: finalWaitlistCapacity,
+          people: waitlistPeople,
+          full: waitlistCount >= finalWaitlistCapacity
         }
       };
-    });
+    }));
     
     res.json(slotsWithStats);
   } catch (error) {
@@ -1799,11 +1826,12 @@ app.delete('/api/admin/timeslots/:id', authMiddleware, adminOnly, async (req, re
 
 app.get('/api/admin/stats', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const [totalSlots, publishedSlots, totalBookings, totalCheckIns] = await Promise.all([
+    const [totalSlots, publishedSlots, totalBookings, totalCheckIns, totalWaitlistEntries] = await Promise.all([
       prisma.timeslot.count({ where: { archived: false } }), // Only count non-archived slots
       prisma.timeslot.count({ where: { published: true, archived: false } }),
       prisma.registration.count(),
-      prisma.registration.count({ where: { checkedIn: true } })
+      prisma.registration.count({ where: { checkedIn: true } }),
+      prisma.waitlistEntry.count()
     ]);
     
     // Calculate total checked-in capacity (total people who actually checked in)
@@ -1816,14 +1844,26 @@ app.get('/api/admin/stats', authMiddleware, adminOnly, async (req, res) => {
       return sum + (reg.actualCheckInCount || reg.partySize);
     }, 0);
     
+    // Calculate total waitlist capacity and people on waitlist
+    const waitlistEntries = await prisma.waitlistEntry.findMany({
+      select: { partySize: true }
+    });
+    
+    const totalWaitlistPeople = waitlistEntries.reduce((sum, entry) => {
+      return sum + entry.partySize;
+    }, 0);
+    
     res.json({
       totalSlots,
       publishedSlots,
       totalBookings,
       totalCheckIns,
-      totalCheckedInCapacity
+      totalCheckedInCapacity,
+      totalWaitlistEntries,
+      totalWaitlistPeople
     });
   } catch (error) {
+    console.error('Stats API error:', error);
     res.status(500).json({ error: 'Failed to load stats' });
   }
 });

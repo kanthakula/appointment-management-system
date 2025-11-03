@@ -1116,6 +1116,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
               <th style={thStyles}>Capacity</th>
               <th style={thStyles}>Remaining</th>
               <th style={thStyles}>Bookings</th>
+              <th style={thStyles}>Waitlist</th>
               <th style={thStyles}>Checked In</th>
               <th style={thStyles}>Status</th>
               <th style={thStyles}>Auto-Publish</th>
@@ -1159,20 +1160,35 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                     ({slot.stats?.totalPeopleBooked || 0} people)
                   </div>
                 </td>
-                      <td style={tdStyles}>
-                        <div style={{ fontSize: '0.9rem' }}>
-                          <span 
-                            style={{ 
-                              color: slot.stats?.totalCheckedIn > 0 ? '#10B981' : '#6B7280',
-                              cursor: slot.stats?.totalCheckedIn > 0 ? 'pointer' : 'default',
-                              textDecoration: slot.stats?.totalCheckedIn > 0 ? 'underline' : 'none',
-                              fontWeight: 'bold'
-                            }}
-                            onClick={() => slot.stats?.totalCheckedIn > 0 && handleCheckedInClick(slot)}
-                          >
-                            {slot.stats?.totalCheckedIn || 0} checked in
-                          </span>
-                        </div>
+                <td style={tdStyles}>
+                  <div style={{ fontSize: '0.9rem' }}>
+                    <strong style={{ 
+                      color: slot.waitlist?.full ? '#DC2626' : slot.waitlist?.count > 0 ? '#F59E0B' : '#6B7280'
+                    }}>
+                      {slot.waitlist?.count || 0}/{slot.waitlist?.capacity || 0}
+                    </strong>
+                    {slot.waitlist?.full && (
+                      <span style={{ fontSize: '0.75rem', color: '#DC2626', marginLeft: '0.25rem' }}>FULL</span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>
+                    ({slot.waitlist?.people || 0} people)
+                  </div>
+                </td>
+                <td style={tdStyles}>
+                  <div style={{ fontSize: '0.9rem' }}>
+                    <span 
+                      style={{ 
+                        color: slot.stats?.totalCheckedIn > 0 ? '#10B981' : '#6B7280',
+                        cursor: slot.stats?.totalCheckedIn > 0 ? 'pointer' : 'default',
+                        textDecoration: slot.stats?.totalCheckedIn > 0 ? 'underline' : 'none',
+                        fontWeight: 'bold'
+                      }}
+                      onClick={() => slot.stats?.totalCheckedIn > 0 && handleCheckedInClick(slot)}
+                    >
+                      {slot.stats?.totalCheckedIn || 0} checked in
+                    </span>
+                  </div>
                         <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>
                           ({slot.stats?.totalPeopleCheckedIn || 0} people)
                         </div>
