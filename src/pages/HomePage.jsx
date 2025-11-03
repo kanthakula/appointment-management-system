@@ -168,9 +168,10 @@ const HomePage = () => {
             style={{
               ...slotCardStyles,
               border: slot.isHighlighted 
-                ? `3px solid ${theme.accentColor || '#10B981'}` 
+                ? `3px solid #10B981` 
                 : slotCardStyles.border,
               backgroundColor: slot.isHighlighted ? '#F0FDF4' : 'white',
+              boxShadow: slot.isHighlighted ? '0 4px 12px rgba(16, 185, 129, 0.3)' : slotCardStyles.boxShadow,
               transition: 'all 0.3s'
             }}
           >

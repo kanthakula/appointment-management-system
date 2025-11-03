@@ -2881,9 +2881,41 @@ Respond in JSON format only.`;
         take: 10
       });
 
-      // Generate friendly response
+      // Generate friendly response using ACTUAL slot dates, not intent date
       let responseMessage = `Found ${matchingSlots.length} available slot(s)`;
-      if (intent.date) {
+      
+      if (matchingSlots.length > 0) {
+        // Get unique dates from actual slots
+        const uniqueDates = [...new Set(matchingSlots.map(slot => {
+          const slotDate = new Date(slot.date);
+          return slotDate.toISOString().split('T')[0];
+        }))];
+        
+        if (uniqueDates.length === 1) {
+          // Single date - show specific date
+          const dateStr = new Date(uniqueDates[0]).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          responseMessage += ` for ${dateStr}`;
+        } else if (uniqueDates.length > 1) {
+          // Multiple dates - show date range
+          const firstDate = new Date(uniqueDates[0]).toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric'
+          });
+          const lastDate = new Date(uniqueDates[uniqueDates.length - 1]).toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric'
+          });
+          responseMessage += ` from ${firstDate} to ${lastDate}`;
+        }
+      } else if (intent.date) {
+        // Fallback to intent date if no slots found
         const dateStr = new Date(intent.date).toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',
@@ -2892,7 +2924,8 @@ Respond in JSON format only.`;
         });
         responseMessage += ` for ${dateStr}`;
       }
-      if (intent.time) {
+      
+      if (intent.time && matchingSlots.length > 0) {
         responseMessage += ` in the ${intent.time}`;
       }
 

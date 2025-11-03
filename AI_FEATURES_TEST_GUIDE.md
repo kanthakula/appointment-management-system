@@ -3,6 +3,7 @@
 ## 🎯 Overview
 
 This guide will help you test and experience all AI features that have been implemented:
+
 1. ✨ **Smart Slot Recommendations** - AI suggests best slots based on booking history
 2. 💬 **Natural Language Booking** - Book using plain English
 3. 📧 **AI Email Generation** - Personalized email content
@@ -15,16 +16,19 @@ This guide will help you test and experience all AI features that have been impl
 ### Step 1: Verify Environment Setup
 
 1. **Check your `.env` file has:**
+
    ```bash
    AI_PROVIDER=openai
    OPENAI_API_KEY=sk-your-key-here
    ```
 
 2. **Verify server is running:**
+
    ```bash
    # Check if server is running on port 3002
    curl http://localhost:3002/api/config/theme
    ```
+
    If you get a response, server is running ✅
 
 3. **If server not running:**
@@ -44,6 +48,7 @@ This guide will help you test and experience all AI features that have been impl
 #### Step 1.1: Test via API
 
 Open Terminal and run:
+
 ```bash
 curl "http://localhost:3002/api/slots/recommendations?email=test@example.com"
 ```
@@ -51,6 +56,7 @@ curl "http://localhost:3002/api/slots/recommendations?email=test@example.com"
 #### Step 1.2: What to Expect
 
 You should see JSON response like:
+
 ```json
 {
   "recommendations": [
@@ -79,6 +85,7 @@ curl "http://localhost:3002/api/slots/recommendations?email=your-actual-email@ex
 ```
 
 **✅ Success Criteria:**
+
 - Returns recommendations array
 - Each recommendation has a `recommendationReason`
 - Response time is under 3 seconds
@@ -101,6 +108,7 @@ curl -X POST http://localhost:3002/api/booking/natural-language \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "intent": {
@@ -127,6 +135,7 @@ curl -X POST http://localhost:3002/api/booking/natural-language \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "intent": {
@@ -146,6 +155,7 @@ curl -X POST http://localhost:3002/api/booking/natural-language \
 Try these commands one by one:
 
 **A. Morning Slots:**
+
 ```bash
 curl -X POST http://localhost:3002/api/booking/natural-language \
   -H "Content-Type: application/json" \
@@ -153,6 +163,7 @@ curl -X POST http://localhost:3002/api/booking/natural-language \
 ```
 
 **B. Evening Slots:**
+
 ```bash
 curl -X POST http://localhost:3002/api/booking/natural-language \
   -H "Content-Type: application/json" \
@@ -160,6 +171,7 @@ curl -X POST http://localhost:3002/api/booking/natural-language \
 ```
 
 **C. Specific Time:**
+
 ```bash
 curl -X POST http://localhost:3002/api/booking/natural-language \
   -H "Content-Type: application/json" \
@@ -167,6 +179,7 @@ curl -X POST http://localhost:3002/api/booking/natural-language \
 ```
 
 **D. Cancel Booking:**
+
 ```bash
 curl -X POST http://localhost:3002/api/booking/natural-language \
   -H "Content-Type: application/json" \
@@ -174,6 +187,7 @@ curl -X POST http://localhost:3002/api/booking/natural-language \
 ```
 
 **✅ Success Criteria:**
+
 - Intent is correctly parsed (action, date, time, partySize)
 - Matching slots are returned
 - Response time is under 3 seconds
@@ -201,6 +215,7 @@ curl -X POST http://localhost:3002/api/ai/generate-email \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "emailContent": "Dear John Doe,\n\nThank you for booking...",
@@ -210,6 +225,7 @@ curl -X POST http://localhost:3002/api/ai/generate-email \
 ```
 
 **Check:** Email should include:
+
 - ✅ Name (John Doe)
 - ✅ Date and time
 - ✅ Party size (2 people)
@@ -270,6 +286,7 @@ curl -X POST http://localhost:3002/api/ai/generate-email \
 **Expected:** Urgent but friendly waitlist notification
 
 **✅ Success Criteria:**
+
 - Email is personalized (includes name)
 - Content is relevant to type (confirmation/reminder/etc.)
 - Professional tone
@@ -296,6 +313,7 @@ curl http://localhost:3002/api/ai/stats \
 ```
 
 **Expected Response:**
+
 ```json
 {
   "monthlyUsage": 1250,
@@ -306,6 +324,7 @@ curl http://localhost:3002/api/ai/stats \
 ```
 
 **✅ Success Criteria:**
+
 - Shows usage statistics
 - Updates as you use AI features
 - Only accessible by admins (403 error if not admin)
@@ -317,6 +336,7 @@ curl http://localhost:3002/api/ai/stats \
 ### Test Recommendations in Browser
 
 1. **Open booking page:**
+
    ```
    http://localhost:3002/booking
    ```
@@ -325,10 +345,10 @@ curl http://localhost:3002/api/ai/stats \
 
 3. **Check browser console (F12) and run:**
    ```javascript
-   fetch('/api/slots/recommendations?email=test@example.com')
-     .then(r => r.json())
-     .then(data => {
-       console.log('Recommendations:', data);
+   fetch("/api/slots/recommendations?email=test@example.com")
+     .then((r) => r.json())
+     .then((data) => {
+       console.log("Recommendations:", data);
        // Display recommendations in UI
      });
    ```
@@ -339,28 +359,28 @@ Open browser console (F12) and try:
 
 ```javascript
 // Test 1: Find slots
-fetch('/api/booking/natural-language', {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
+fetch("/api/booking/natural-language", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    message: 'Find me slots for tomorrow afternoon',
-    email: 'test@example.com'
-  })
+    message: "Find me slots for tomorrow afternoon",
+    email: "test@example.com",
+  }),
 })
-.then(r => r.json())
-.then(console.log);
+  .then((r) => r.json())
+  .then(console.log);
 
 // Test 2: Book intent
-fetch('/api/booking/natural-language', {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
+fetch("/api/booking/natural-language", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    message: 'Book me for next Sunday for 3 people',
-    email: 'test@example.com'
-  })
+    message: "Book me for next Sunday for 3 people",
+    email: "test@example.com",
+  }),
 })
-.then(r => r.json())
-.then(console.log);
+  .then((r) => r.json())
+  .then(console.log);
 ```
 
 ---
@@ -376,6 +396,7 @@ node tests/ai-tests.js
 ```
 
 **Expected Output:**
+
 ```
 🚀 Starting AI Functionality Tests
 📍 Testing against: http://localhost:3002
@@ -403,6 +424,7 @@ node tests/ai-tests.js
 Use this checklist to verify everything works:
 
 ### Smart Recommendations
+
 - [ ] Returns recommendations for valid email
 - [ ] Recommendations include reasoning
 - [ ] Works for new users (no history)
@@ -410,6 +432,7 @@ Use this checklist to verify everything works:
 - [ ] Response time is acceptable (< 3 seconds)
 
 ### Natural Language Booking
+
 - [ ] Parses "find slots" correctly
 - [ ] Parses "book" intent correctly
 - [ ] Extracts party size
@@ -418,6 +441,7 @@ Use this checklist to verify everything works:
 - [ ] Returns matching slots
 
 ### Email Generation
+
 - [ ] Confirmation emails are personalized
 - [ ] Reminder emails are brief and helpful
 - [ ] Cancellation emails are courteous
@@ -425,6 +449,7 @@ Use this checklist to verify everything works:
 - [ ] All emails include booking details
 
 ### Error Handling
+
 - [ ] Missing email returns 400 error
 - [ ] Missing message returns 400 error
 - [ ] Invalid requests handled gracefully
@@ -435,21 +460,25 @@ Use this checklist to verify everything works:
 ## 🎯 What AI Features You Got
 
 ### 1. ✨ Smart Slot Recommendations
+
 - **Benefit:** Users see personalized slot suggestions
 - **Saves Time:** No need to browse all slots
 - **Improves Conversion:** 10-20% increase expected
 
 ### 2. 💬 Natural Language Booking
+
 - **Benefit:** Book using plain English, no forms
 - **User Friendly:** "Book me for next Sunday" works
 - **Accessible:** Voice assistants can use this
 
 ### 3. 📧 AI Email Generation
+
 - **Benefit:** Personalized emails without templates
 - **Saves Time:** No manual email writing
 - **Professional:** Always appropriate tone
 
 ### 4. 📊 Usage Tracking
+
 - **Benefit:** Monitor AI costs and usage
 - **Control:** Set monthly limits
 - **Transparency:** See what's being used
@@ -459,26 +488,34 @@ Use this checklist to verify everything works:
 ## 🐛 Troubleshooting
 
 ### Issue: "404 Not Found" errors
+
 **Solution:** Restart server:
+
 ```bash
 pkill -f "node server.js"
 npm start
 ```
 
 ### Issue: "OPENAI_API_KEY is not set"
+
 **Solution:** Add to `.env`:
+
 ```bash
 OPENAI_API_KEY=sk-your-key-here
 ```
 
 ### Issue: Slow responses (5+ seconds)
+
 **Solution:** This is normal for AI. Consider:
+
 - Using `gpt-4o-mini` (already configured, fastest)
 - Caching recommendations
 - Accepting 2-5 second response times
 
 ### Issue: "No available slots found"
+
 **Solution:** Create some time slots first:
+
 1. Go to admin panel
 2. Create a few published time slots
 3. Make sure they're in the future
@@ -501,6 +538,7 @@ You'll know everything works when:
 ## 🎉 You're Done!
 
 After testing, you should have:
+
 - ✅ Verified all AI features work
 - ✅ Experienced smart recommendations
 - ✅ Tested natural language booking
@@ -508,6 +546,7 @@ After testing, you should have:
 - ✅ Confirmed everything is production-ready
 
 **Next Steps:**
+
 1. Integrate frontend components (see `AI_QUICK_START.md`)
 2. Monitor usage via admin dashboard
 3. Deploy to production when ready
@@ -515,7 +554,7 @@ After testing, you should have:
 ---
 
 **Need Help?** Check:
+
 - `tests/TESTING_GUIDE.md` - Detailed testing guide
 - `tests/QUICK_TEST.md` - Quick 5-minute tests
 - `AI_SETUP.md` - Setup instructions
-
