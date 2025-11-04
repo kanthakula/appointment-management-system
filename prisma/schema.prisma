@@ -146,9 +146,9 @@ model AuditLog {
   id        String   @id @default(cuid())
   action    String   // "CREATE_ADMIN", "DEACTIVATE_ADMIN", "ACTIVATE_ADMIN", "UPDATE_ADMIN"
   details   String   // JSON string with action details
-  performedBy String   // ID of the admin who performed the action
+  performedBy String?  // ID of the admin who performed the action (null for system actions)
   performedOn String?  // ID of the user who was affected (if applicable)
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [performedBy], references: [id])
+  user      User?    @relation(fields: [performedBy], references: [id])
 }
 

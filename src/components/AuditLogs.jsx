@@ -171,8 +171,16 @@ const AuditLogs = () => {
                   </span>
                 </td>
                 <td style={tdStyles}>
-                  <div style={{ fontWeight: 'bold' }}>{log.user?.name || 'Unknown'}</div>
-                  <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>{log.user?.email || ''}</div>
+                  <div style={{ fontWeight: 'bold' }}>
+                    {log.performedBy === null || log.action.startsWith('AUTO_') 
+                      ? 'System' 
+                      : (log.user?.name || 'Unknown')}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>
+                    {log.performedBy === null || log.action.startsWith('AUTO_') 
+                      ? 'Automated system action' 
+                      : (log.user?.email || '')}
+                  </div>
                 </td>
                 <td style={tdStyles}>
                   <div style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>

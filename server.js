@@ -2810,21 +2810,15 @@ const autoPublishCron = new cron.CronJob('*/5 * * * *', async () => {
           }
         });
         
-        // Log the auto-publishing action (find a system user or skip if none exists)
+        // Log the auto-publishing action as system action (no user)
         try {
-          const systemUser = await prisma.user.findFirst({
-            where: { role: 'super_admin' }
+          await prisma.auditLog.create({
+            data: {
+              action: 'AUTO_PUBLISH_TIMESLOT',
+              details: `Auto-published timeslot: ${slot.date.toISOString().slice(0,10)} ${slot.start}-${slot.end||'N/A'} (${slot.autoPublishType === 'scheduled' ? 'Scheduled' : `${slot.autoPublishHoursBefore}h before`})`,
+              performedBy: null // System action - no user
+            }
           });
-          
-          if (systemUser) {
-            await prisma.auditLog.create({
-              data: {
-                action: 'AUTO_PUBLISH_TIMESLOT',
-                details: `Auto-published timeslot: ${slot.date.toISOString().slice(0,10)} ${slot.start}-${slot.end||'N/A'} (${slot.autoPublishType === 'scheduled' ? 'Scheduled' : `${slot.autoPublishHoursBefore}h before`})`,
-                performedBy: systemUser.id
-              }
-            });
-          }
         } catch (logError) {
           console.error('Error logging auto-publish action:', logError);
         }
@@ -2877,21 +2871,15 @@ const autoArchiveCron = new cron.CronJob('0 * * * *', async () => {
         }
       });
       
-      // Log the auto-archiving action (find a system user or skip if none exists)
+      // Log the auto-archiving action as system action (no user)
       try {
-        const systemUser = await prisma.user.findFirst({
-          where: { role: 'super_admin' }
+        await prisma.auditLog.create({
+          data: {
+            action: 'AUTO_ARCHIVE_TIMESLOT',
+            details: `Auto-archived timeslot: ${slot.date.toISOString().slice(0,10)} ${slot.start}-${slot.end||'N/A'} (Past date, was ${slot.published ? 'published' : 'unpublished'})`,
+            performedBy: null // System action - no user
+          }
         });
-        
-        if (systemUser) {
-          await prisma.auditLog.create({
-            data: {
-              action: 'AUTO_ARCHIVE_TIMESLOT',
-              details: `Auto-archived timeslot: ${slot.date.toISOString().slice(0,10)} ${slot.start}-${slot.end||'N/A'} (Past date, was ${slot.published ? 'published' : 'unpublished'})`,
-              performedBy: systemUser.id
-            }
-          });
-        }
       } catch (logError) {
         console.error('Error logging auto-archive action:', logError);
       }
