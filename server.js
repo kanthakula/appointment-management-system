@@ -1680,10 +1680,16 @@ app.post('/api/waitlist/:timeslotId', async (req, res) => {
       }
     });
     
+    // Get updated count after creation to ensure accuracy
+    const updatedWaitlistCount = await prisma.waitlistEntry.count({
+      where: { timeslotId }
+    });
+    
     res.status(201).json({
       ...waitlistEntry,
       waitlistPosition: nextPosition,
       totalWaitlistCapacity: waitlistCapacity,
+      currentWaitlistCount: updatedWaitlistCount,
       message: `You've been added to the waitlist at position ${nextPosition}. We'll notify you if a spot becomes available.`
     });
   } catch (error) {

@@ -21,8 +21,16 @@ const HomePage = () => {
     const handleFocus = () => {
       fetchSlots()
     }
+    // Refresh slots when custom event is triggered (e.g., after waitlist entry)
+    const handleRefreshSlots = () => {
+      fetchSlots()
+    }
     window.addEventListener('focus', handleFocus)
-    return () => window.removeEventListener('focus', handleFocus)
+    window.addEventListener('refreshSlots', handleRefreshSlots)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('refreshSlots', handleRefreshSlots)
+    }
   }, [])
 
   const fetchSlots = async () => {

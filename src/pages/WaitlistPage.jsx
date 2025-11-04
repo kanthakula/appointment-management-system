@@ -66,10 +66,12 @@ const WaitlistPage = () => {
       if (response.ok) {
         const result = await response.json()
         setSuccess(result.message || 'Successfully added to waitlist!')
-        // Navigate back to home after 3 seconds
+        // Force refresh of home page data after a short delay
         setTimeout(() => {
+          // Trigger a custom event to refresh slots on home page
+          window.dispatchEvent(new CustomEvent('refreshSlots'))
           navigate('/')
-        }, 3000)
+        }, 1500)
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to add to waitlist')
