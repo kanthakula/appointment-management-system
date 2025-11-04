@@ -1684,9 +1684,14 @@ app.post('/api/waitlist/:timeslotId', async (req, res) => {
     });
     
     // Get updated count after creation to ensure accuracy
+    // Use a small delay to ensure database transaction is committed
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const updatedWaitlistCount = await prisma.waitlistEntry.count({
       where: { timeslotId }
     });
+    
+    console.log(`[Waitlist] After creation: Slot ${timeslotId.substring(0, 8)}, New count: ${updatedWaitlistCount}, Position: ${nextPosition}`);
     
     res.status(201).json({
       ...waitlistEntry,
