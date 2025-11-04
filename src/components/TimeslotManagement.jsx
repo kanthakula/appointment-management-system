@@ -1231,6 +1231,7 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                       {slot.published ? 'Published' : 'Draft'}
                     </span>
                     
+                    
                     {/* Auto-archive warning for unpublished slots past their date */}
                     {!slot.published && !slot.archived && (() => {
                       const slotDate = new Date(slot.date);
