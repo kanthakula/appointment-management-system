@@ -1179,11 +1179,18 @@ app.put('/api/admin/timeslots/:id/publish', authMiddleware, adminOnly, async (re
     // Get timeslot details for validation and logging
     const existingTimeslot = await prisma.timeslot.findUnique({
       where: { id: req.params.id },
-      select: { date: true, start: true, end: true }
+      select: { date: true, start: true, end: true, archived: true }
     });
 
     if (!existingTimeslot) {
       return res.status(404).json({ error: 'Timeslot not found' });
+    }
+
+    // Check if slot is archived - archived slots cannot be published
+    if (publish && existingTimeslot.archived) {
+      return res.status(400).json({ 
+        error: 'Cannot publish archived slots. Please restore the slot first.' 
+      });
     }
 
     // If trying to publish, check if the slot date is in the past using timezone-aware comparison
