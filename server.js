@@ -691,7 +691,7 @@ app.get('/api/timeslots', async (req, res) => {
         ? 1 
         : waitlistCapacity;
       
-      // Get current waitlist count
+      // Get current waitlist count - use a fresh query to ensure accuracy
       const waitlistCount = await prisma.waitlistEntry.count({
         where: { timeslotId: slot.id }
       });
@@ -1632,13 +1632,16 @@ app.post('/api/waitlist/:timeslotId', async (req, res) => {
     // Calculate waitlist capacity
     const waitlistCapacity = await getWaitlistCapacity(timeslotId);
     
-    // Get current waitlist count
+    // Get current waitlist count - use a fresh query to ensure accuracy
     const currentWaitlistCount = await prisma.waitlistEntry.count({
       where: { timeslotId }
     });
     
     // Get waitlist percentage for error message
     const waitlistPercentage = config?.waitlistPercentage ?? 10;
+    
+    // Debug logging
+    console.log(`[Waitlist] Slot ${timeslotId.substring(0, 8)}: Current count: ${currentWaitlistCount}, Capacity: ${waitlistCapacity}, Trying to add: ${partySizeNum} people`);
     
     // Check if waitlist is full
     if (currentWaitlistCount >= waitlistCapacity) {
