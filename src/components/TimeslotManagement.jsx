@@ -1221,16 +1221,28 @@ const TimeslotManagement = ({ timeslots, onRefresh }) => {
                       </td>
                 <td style={tdStyles}>
                   <div>
-                    <span style={{
-                      padding: '0.25rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.8rem',
-                      backgroundColor: slot.published ? '#D1FAE5' : '#FEE2E2',
-                      color: slot.published ? '#065F46' : '#DC2626'
-                    }}>
-                      {slot.published ? 'Published' : 'Draft'}
-                    </span>
-                    
+                    {slot.archived ? (
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        backgroundColor: slot.archivedBy === 'system' ? '#FEF3C7' : '#FEE2E2',
+                        color: slot.archivedBy === 'system' ? '#92400E' : '#DC2626',
+                        fontWeight: 'bold'
+                      }}>
+                        {slot.archivedBy === 'system' ? '🔄 Auto-Archived' : '📦 Archived'}
+                      </span>
+                    ) : (
+                      <span style={{
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        backgroundColor: slot.published ? '#D1FAE5' : '#FEE2E2',
+                        color: slot.published ? '#065F46' : '#DC2626'
+                      }}>
+                        {slot.published ? 'Published' : 'Draft'}
+                      </span>
+                    )}
                     
                     {/* Auto-archive warning for unpublished slots past their date */}
                     {!slot.published && !slot.archived && (() => {
