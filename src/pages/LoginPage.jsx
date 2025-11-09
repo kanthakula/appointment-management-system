@@ -1,5 +1,16 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import {
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  CircularProgress,
+  Stack
+} from '@mui/material'
 import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -38,126 +49,74 @@ const LoginPage = () => {
     setLoading(false)
   }
 
-  const formStyles = {
-    maxWidth: '400px',
-    margin: '2rem auto',
-    padding: '2rem',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-  }
-
-  const inputStyles = {
-    width: '100%',
-    padding: '0.75rem',
-    margin: '0.5rem 0',
-    border: `2px solid #E5E7EB`,
-    borderRadius: '6px',
-    fontSize: '1rem',
-    boxSizing: 'border-box'
-  }
-
-  const buttonStyles = {
-    width: '100%',
-    backgroundColor: theme.primaryColor,
-    color: 'white',
-    padding: '0.75rem',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '1rem',
-    fontWeight: 'bold',
-    cursor: loading ? 'not-allowed' : 'pointer',
-    opacity: loading ? 0.7 : 1
-  }
-
-  const linkStyles = {
-    color: theme.primaryColor,
-    textDecoration: 'none',
-    textAlign: 'center',
-    display: 'block',
-    marginTop: '1rem'
-  }
-
   return (
-    <div style={{ padding: '2rem' }}>
-      <div style={formStyles}>
-        <h2 style={{ 
-          textAlign: 'center', 
-          color: theme.primaryColor,
-          marginBottom: '2rem'
-        }}>
-          Admin Login
-        </h2>
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', py: 4 }}>
+      <Card sx={{ maxWidth: 400, width: '100%', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+        <CardContent sx={{ p: 4 }}>
+          <Typography variant="h4" component="h2" sx={{ textAlign: 'center', color: theme.primaryColor, fontWeight: 700, mb: 3 }}>
+            Admin Login
+          </Typography>
 
-        {error && (
-          <div style={{
-            backgroundColor: '#FEE2E2',
-            color: '#DC2626',
-            padding: '0.75rem',
-            borderRadius: '6px',
-            marginBottom: '1rem',
-            textAlign: 'center'
-          }}>
-            {error}
-          </div>
-        )}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem',
-              fontWeight: 'bold',
-              color: theme.textColor
-            }}>
-              Email Address
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              style={inputStyles}
-              placeholder="admin@example.com"
-            />
-          </div>
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={2}>
+              <TextField
+                label="Email Address"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                fullWidth
+                placeholder="admin@example.com"
+                variant="outlined"
+              />
 
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem',
-              fontWeight: 'bold',
-              color: theme.textColor
-            }}>
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              style={inputStyles}
-              placeholder="Enter your password"
-            />
-          </div>
+              <TextField
+                label="Password"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                fullWidth
+                placeholder="Enter your password"
+                variant="outlined"
+              />
 
-          <button 
-            type="submit" 
-            disabled={loading}
-            style={buttonStyles}
-          >
-            {loading ? 'Signing In...' : 'Sign In'}
-          </button>
-        </form>
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={loading}
+                sx={{
+                  py: 1.5,
+                  backgroundColor: theme.primaryColor,
+                  '&:hover': { backgroundColor: theme.primaryColor, opacity: 0.9 }
+                }}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
+              </Button>
+            </Stack>
+          </form>
 
-        
-        <Link to="/" style={linkStyles}>
-          ← Back to Home
-        </Link>
-      </div>
-    </div>
+          <Box sx={{ textAlign: 'center', mt: 3 }}>
+            <Button
+              component={Link}
+              to="/"
+              sx={{ color: theme.primaryColor, textTransform: 'none' }}
+            >
+              ← Back to Home
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   )
 }
 

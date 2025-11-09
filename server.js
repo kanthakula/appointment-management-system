@@ -2832,8 +2832,8 @@ const autoPublishCron = new cron.CronJob('*/5 * * * *', async () => {
 });
 autoPublishCron.start();
 
-// Auto-archiving cron job - runs every hour to archive slots past their date
-const autoArchiveCron = new cron.CronJob('0 * * * *', async () => {
+// Auto-archiving cron job - runs every 10 minutes to archive slots past their date
+const autoArchiveCron = new cron.CronJob('*/10 * * * *', async () => {
   console.log('Auto-archive job running');
   
   try {

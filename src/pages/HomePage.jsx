@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  TextField,
+  Stack,
+  Chip,
+  CircularProgress,
+  Alert,
+  Paper,
+  Divider
+} from '@mui/material'
+import { ChatBubbleOutline, AutoAwesome } from '@mui/icons-material'
 import { useTheme } from '../contexts/ThemeContext'
 import AIRecommendations from '../components/AIRecommendations'
 
@@ -17,11 +33,9 @@ const HomePage = () => {
 
   useEffect(() => {
     fetchSlots()
-    // Refresh slots when returning to page (e.g., after adding to waitlist)
     const handleFocus = () => {
       fetchSlots()
     }
-    // Refresh slots when custom event is triggered (e.g., after waitlist entry)
     const handleRefreshSlots = () => {
       fetchSlots()
     }
@@ -35,7 +49,6 @@ const HomePage = () => {
 
   const fetchSlots = async () => {
     try {
-      // Add cache-busting parameter to prevent stale data
       const cacheBuster = `_t=${Date.now()}`
       const response = await fetch(`/api/timeslots?${cacheBuster}`)
       if (response.ok) {
@@ -79,11 +92,8 @@ const HomePage = () => {
       const data = await response.json()
       setNlResults(data)
 
-      // If slots found and user wants to book, show them
       if (data.matchingSlots && data.matchingSlots.length > 0) {
-        // Scroll to show results or highlight matching slots
         const matchingSlotIds = data.matchingSlots.map(s => s.id)
-        // Highlight matching slots in the list
         setSlots(prevSlots => 
           prevSlots.map(slot => ({
             ...slot,
@@ -99,332 +109,260 @@ const HomePage = () => {
   }
 
   const handleSelectRecommendedSlot = (slot) => {
-    // Navigate to booking page with selected slot
     navigate(`/register/${slot.id}`)
   }
 
   const handleSelectNaturalLanguageSlot = (slot) => {
-    // Navigate to booking page with selected slot
     navigate(`/register/${slot.id}`)
-  }
-
-  const slotCardStyles = {
-    backgroundColor: 'white',
-    border: `2px solid ${theme.secondaryColor}`,
-    borderRadius: '8px',
-    padding: '1.5rem',
-    margin: '1rem 0',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-  }
-
-  const buttonStyles = {
-    backgroundColor: theme.secondaryColor,
-    color: 'white',
-    padding: '0.75rem 1.5rem',
-    borderRadius: '6px',
-    textDecoration: 'none',
-    display: 'inline-block',
-    fontWeight: 'bold',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '1rem'
-  }
-
-  const fullButtonStyles = {
-    ...buttonStyles,
-    backgroundColor: '#9CA3AF',
-    cursor: 'not-allowed'
   }
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <div style={{ fontSize: '1.2rem', color: theme.primaryColor }}>
-          Loading available appointments...
-        </div>
-      </div>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Stack spacing={2} alignItems="center">
+          <CircularProgress sx={{ color: theme.primaryColor }} />
+          <Typography sx={{ color: theme.primaryColor, fontWeight: 600 }}>
+            Loading available appointments...
+          </Typography>
+        </Stack>
+      </Box>
     )
   }
 
   if (error) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <div style={{ color: '#EF4444', fontSize: '1.2rem' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <Alert severity="error" sx={{ fontSize: '1.2rem' }}>
           {error}
-        </div>
-      </div>
+        </Alert>
+      </Box>
     )
   }
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
+    <Grid container spacing={3} sx={{ maxWidth: 1400, mx: 'auto' }}>
       {/* Main Content - Slots List */}
-      <div style={{ flex: '1', minWidth: '500px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ color: theme.primaryColor, marginBottom: '1rem' }}>
+      <Grid item xs={12} md={8}>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Typography variant="h4" sx={{ color: theme.primaryColor, fontWeight: 700, mb: 1 }}>
             Available Appointment Slots
-          </h2>
-          <p style={{ fontSize: '1.1rem', color: theme.textColor }}>
+          </Typography>
+          <Typography variant="body1" sx={{ color: theme.textColor }}>
             Book your appointment slot below. You can reserve for up to 5 people per booking.
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
-      {slots.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <div style={{ fontSize: '1.2rem', color: theme.textColor }}>
-            No appointment slots available at this time. Please check back later.
-          </div>
-        </div>
-      ) : (
-        slots.map((slot) => (
-          <div 
-            key={slot.id} 
-            style={{
-              ...slotCardStyles,
-              border: slot.isHighlighted 
-                ? `3px solid #10B981` 
-                : slotCardStyles.border,
-              backgroundColor: slot.isHighlighted ? '#F0FDF4' : 'white',
-              boxShadow: slot.isHighlighted ? '0 4px 12px rgba(16, 185, 129, 0.3)' : slotCardStyles.boxShadow,
-              transition: 'all 0.3s'
-            }}
-          >
-            <h3 style={{ 
-              margin: '0 0 1rem 0', 
-              color: theme.primaryColor,
-              fontSize: '1.3rem'
-            }}>
-              {formatDate(slot.date)} at {slot.start}
-              {slot.end && ` - ${slot.end}`}
-            </h3>
-            
-            <div style={{ 
-              marginBottom: '1rem',
-              fontSize: '1.1rem',
-              color: theme.textColor
-            }}>
-              <strong>Available seats:</strong> {slot.remaining || slot.capacity} out of {slot.capacity}
-            </div>
-
-            {slot.remaining > 0 ? (
-              <Link 
-                to={`/register/${slot.id}`}
-                style={buttonStyles}
+        {slots.length === 0 ? (
+          <Card>
+            <CardContent>
+              <Typography variant="h6" sx={{ textAlign: 'center', color: theme.textColor }}>
+                No appointment slots available at this time. Please check back later.
+              </Typography>
+            </CardContent>
+          </Card>
+        ) : (
+          <Stack spacing={2}>
+            {slots.map((slot) => (
+              <Card
+                key={slot.id}
+                sx={{
+                  border: slot.isHighlighted ? `3px solid #10B981` : `2px solid ${theme.secondaryColor}`,
+                  backgroundColor: slot.isHighlighted ? '#F0FDF4' : 'white',
+                  boxShadow: slot.isHighlighted 
+                    ? '0 4px 12px rgba(16, 185, 129, 0.3)' 
+                    : '0 2px 8px rgba(0,0,0,0.1)',
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
               >
-                Reserve Slot
-              </Link>
-            ) : (
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                <div style={fullButtonStyles}>
-                  Full / Unavailable
-                </div>
-                {slot.waitlistCapacity > 0 && (
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <Link
-                      to={slot.waitlistFull ? '#' : `/waitlist/${slot.id}`}
-                      onClick={(e) => {
-                        if (slot.waitlistFull) {
-                          e.preventDefault();
-                        }
-                      }}
-                      style={{
-                        ...buttonStyles,
-                        backgroundColor: slot.waitlistFull ? '#9CA3AF' : '#DC2626',
-                        border: `2px solid ${slot.waitlistFull ? '#9CA3AF' : '#DC2626'}`,
-                        cursor: slot.waitlistFull ? 'not-allowed' : 'pointer',
-                        opacity: slot.waitlistFull ? 0.6 : 1,
-                        textDecoration: 'none'
+                <CardContent>
+                  <Typography variant="h6" sx={{ color: theme.primaryColor, fontWeight: 600, mb: 1 }}>
+                    {formatDate(slot.date)} at {slot.start}
+                    {slot.end && ` - ${slot.end}`}
+                  </Typography>
+                  
+                  <Typography variant="body1" sx={{ mb: 2, color: theme.textColor }}>
+                    <strong>Available seats:</strong> {slot.remaining || slot.capacity} out of {slot.capacity}
+                  </Typography>
+
+                  {slot.remaining > 0 ? (
+                    <Button
+                      component={Link}
+                      to={`/register/${slot.id}`}
+                      variant="contained"
+                      sx={{
+                        backgroundColor: theme.secondaryColor,
+                        '&:hover': { backgroundColor: theme.secondaryColor, opacity: 0.9 }
                       }}
                     >
-                      {slot.waitlistFull ? 'Waitlist Full' : 'Add to Waitlist'}
-                    </Link>
-                    <span style={{
-                      fontSize: '0.9rem',
-                      color: slot.waitlistFull ? '#DC2626' : '#6B7280',
-                      fontWeight: slot.waitlistFull ? 'bold' : 'normal'
-                    }}>
-                      (Waitlist: {slot.waitlistCount || 0}/{slot.waitlistCapacity || 0})
-                    </span>
-                  </div>
-                )}
-                {(!slot.waitlistCapacity || slot.waitlistCapacity === 0) && (
-                  <div style={{ 
-                    fontSize: '0.9rem', 
-                    color: '#6B7280',
-                    fontStyle: 'italic'
-                  }}>
-                    Waitlist not available
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        ))
-      )}
-      </div>
+                      Reserve Slot
+                    </Button>
+                  ) : (
+                    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+                      <Chip label="Full / Unavailable" color="default" />
+                      {slot.waitlistCapacity > 0 && (
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Button
+                            component={Link}
+                            to={slot.waitlistFull ? '#' : `/waitlist/${slot.id}`}
+                            onClick={(e) => {
+                              if (slot.waitlistFull) {
+                                e.preventDefault()
+                              }
+                            }}
+                            variant="contained"
+                            disabled={slot.waitlistFull}
+                            sx={{
+                              backgroundColor: slot.waitlistFull ? '#9CA3AF' : '#DC2626',
+                              '&:hover': { 
+                                backgroundColor: slot.waitlistFull ? '#9CA3AF' : '#B91C1C' 
+                              }
+                            }}
+                          >
+                            {slot.waitlistFull ? 'Waitlist Full' : 'Add to Waitlist'}
+                          </Button>
+                          <Typography 
+                            variant="caption" 
+                            sx={{ 
+                              color: slot.waitlistFull ? '#DC2626' : '#6B7280',
+                              fontWeight: slot.waitlistFull ? 'bold' : 'normal'
+                            }}
+                          >
+                            (Waitlist: {slot.waitlistCount || 0}/{slot.waitlistCapacity || 0})
+                          </Typography>
+                        </Stack>
+                      )}
+                      {(!slot.waitlistCapacity || slot.waitlistCapacity === 0) && (
+                        <Typography variant="caption" sx={{ color: '#6B7280', fontStyle: 'italic' }}>
+                          Waitlist not available
+                        </Typography>
+                      )}
+                    </Stack>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </Stack>
+        )}
+      </Grid>
 
       {/* Sidebar - AI Features */}
-      <div style={{ width: '400px', flexShrink: 0 }}>
+      <Grid item xs={12} md={4}>
         {/* Natural Language Booking Section */}
-        <div style={{
-          marginBottom: '2rem',
-          padding: '1.5rem',
-          backgroundColor: '#F9FAFB',
-          borderRadius: '8px',
-          border: `2px solid ${theme.accentColor || theme.primaryColor || '#3B82F6'}`,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '1rem'
-          }}>
-            <h3 style={{
-              margin: 0,
-              color: theme.primaryColor,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '1.1rem'
-            }}>
-              💬 Book with Natural Language
-            </h3>
-            <button
-              onClick={() => setShowNaturalLanguage(!showNaturalLanguage)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: theme.primaryColor,
-                cursor: 'pointer',
-                fontSize: '14px',
-                textDecoration: 'underline'
-              }}
-            >
-              {showNaturalLanguage ? 'Hide' : 'Try it'}
-            </button>
-          </div>
+        <Card sx={{ mb: 3, border: `2px solid ${theme.accentColor || theme.primaryColor}` }}>
+          <CardContent>
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <ChatBubbleOutline sx={{ color: theme.primaryColor }} />
+                <Typography variant="h6" sx={{ color: theme.primaryColor, fontWeight: 600 }}>
+                  Book with Natural Language
+                </Typography>
+              </Stack>
+              <Button
+                onClick={() => setShowNaturalLanguage(!showNaturalLanguage)}
+                size="small"
+                sx={{ color: theme.primaryColor, textTransform: 'none' }}
+              >
+                {showNaturalLanguage ? 'Hide' : 'Try it'}
+              </Button>
+            </Stack>
 
-          {showNaturalLanguage && (
-            <div>
-              <div style={{ marginBottom: '1rem' }}>
-                <input
+            {showNaturalLanguage && (
+              <Stack spacing={2}>
+                <TextField
                   type="email"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
                   placeholder="Your email (optional, for recommendations)"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    marginBottom: '0.75rem',
-                    border: `2px solid #E5E7EB`,
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box'
-                  }}
+                  fullWidth
+                  size="small"
                 />
-                <input
+                <TextField
                   type="text"
                   value={nlMessage}
                   onChange={(e) => setNlMessage(e.target.value)}
                   placeholder='Try: "Book me for next Sunday afternoon" or "Find slots on November 3rd"'
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    border: `2px solid #E5E7EB`,
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box'
-                  }}
+                  fullWidth
+                  size="small"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       handleNaturalLanguageBooking()
                     }
                   }}
                 />
-              </div>
-              <button
-                onClick={handleNaturalLanguageBooking}
-                disabled={nlLoading || !nlMessage.trim()}
-                style={{
-                  width: '100%',
-                  backgroundColor: theme.primaryColor || '#3B82F6',
-                  color: 'white',
-                  padding: '0.75rem',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  cursor: (nlLoading || !nlMessage.trim()) ? 'not-allowed' : 'pointer',
-                  opacity: (nlLoading || !nlMessage.trim()) ? 0.6 : 1,
-                  marginBottom: '1rem'
-                }}
-              >
-                {nlLoading ? 'Processing...' : '✨ Find Slots'}
-              </button>
+                <Button
+                  onClick={handleNaturalLanguageBooking}
+                  disabled={nlLoading || !nlMessage.trim()}
+                  variant="contained"
+                  fullWidth
+                  startIcon={nlLoading ? <CircularProgress size={16} color="inherit" /> : <AutoAwesome />}
+                  sx={{
+                    backgroundColor: theme.primaryColor,
+                    '&:hover': { backgroundColor: theme.primaryColor, opacity: 0.9 }
+                  }}
+                >
+                  {nlLoading ? 'Processing...' : 'Find Slots'}
+                </Button>
 
-              {nlResults && (
-                <div style={{
-                  padding: '1rem',
-                  backgroundColor: nlResults.error ? '#FEE2E2' : '#D1FAE5',
-                  borderRadius: '6px',
-                  color: nlResults.error ? '#DC2626' : '#065F46',
-                  fontSize: '14px'
-                }}>
-                  {nlResults.error ? (
-                    <p style={{ margin: 0 }}>{nlResults.error}</p>
-                  ) : (
-                    <div>
-                      <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold' }}>
-                        {nlResults.message}
-                      </p>
-                      {nlResults.matchingSlots && nlResults.matchingSlots.length > 0 && (
-                        <div>
-                          <p style={{ margin: '0.5rem 0', fontSize: '13px' }}>
-                            Found {nlResults.matchingSlots.length} slot(s):
-                          </p>
-                          {nlResults.matchingSlots.slice(0, 5).map((slot) => (
-                            <div
-                              key={slot.id}
-                              onClick={() => handleSelectNaturalLanguageSlot(slot)}
-                              style={{
-                                padding: '0.75rem',
-                                margin: '0.5rem 0',
-                                backgroundColor: '#fff',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                border: `2px solid ${theme.primaryColor}`,
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.transform = 'translateY(-2px)'
-                                e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)'
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.transform = 'translateY(0)'
-                                e.currentTarget.style.boxShadow = 'none'
-                              }}
-                            >
-                              <strong>{new Date(slot.date).toLocaleDateString()}</strong> at {slot.start}
-                              {slot.end && ` - ${slot.end}`}
-                              <br />
-                              <small style={{ color: '#6B7280' }}>
-                                {slot.remaining} spots remaining
-                              </small>
-                            </div>
-                          ))}
-                          <p style={{ margin: '0.5rem 0 0 0', fontSize: '12px', fontStyle: 'italic' }}>
-                            Matching slots are highlighted in green on the left
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                {nlResults && (
+                  <Alert 
+                    severity={nlResults.error ? 'error' : 'success'}
+                    sx={{ mt: 1 }}
+                  >
+                    {nlResults.error ? (
+                      <Typography variant="body2">{nlResults.error}</Typography>
+                    ) : (
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                          {nlResults.message}
+                        </Typography>
+                        {nlResults.matchingSlots && nlResults.matchingSlots.length > 0 && (
+                          <Box>
+                            <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
+                              Found {nlResults.matchingSlots.length} slot(s):
+                            </Typography>
+                            <Stack spacing={1}>
+                              {nlResults.matchingSlots.slice(0, 5).map((slot) => (
+                                <Paper
+                                  key={slot.id}
+                                  onClick={() => handleSelectNaturalLanguageSlot(slot)}
+                                  sx={{
+                                    p: 1.5,
+                                    cursor: 'pointer',
+                                    border: `2px solid ${theme.primaryColor}`,
+                                    '&:hover': {
+                                      transform: 'translateY(-2px)',
+                                      boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                                    },
+                                    transition: 'all 0.2s'
+                                  }}
+                                >
+                                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                    {new Date(slot.date).toLocaleDateString()} at {slot.start}
+                                    {slot.end && ` - ${slot.end}`}
+                                  </Typography>
+                                  <Typography variant="caption" sx={{ color: '#6B7280' }}>
+                                    {slot.remaining} spots remaining
+                                  </Typography>
+                                </Paper>
+                              ))}
+                            </Stack>
+                            <Typography variant="caption" sx={{ display: 'block', mt: 1, fontStyle: 'italic' }}>
+                              Matching slots are highlighted in green on the left
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+                    )}
+                  </Alert>
+                )}
+              </Stack>
+            )}
+          </CardContent>
+        </Card>
 
         {/* AI Recommendations - Show when email is entered */}
         {userEmail && userEmail.includes('@') && (
@@ -433,8 +371,8 @@ const HomePage = () => {
             onSelectSlot={handleSelectRecommendedSlot}
           />
         )}
-      </div>
-    </div>
+      </Grid>
+    </Grid>
   )
 }
 

@@ -1,105 +1,45 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Avatar,
+  Menu,
+  MenuItem,
+  IconButton,
+  Stack,
+  Divider
+} from '@mui/material'
+import { AccountCircle, Logout, PhotoCamera } from '@mui/icons-material'
 import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
 
 const Header = () => {
   const { theme } = useTheme()
   const { isAuthenticated, isAdmin, logout, user } = useAuth()
-  const [showProfileMenu, setShowProfileMenu] = useState(false)
-  const [showProfileUpload, setShowProfileUpload] = useState(false)
-  const profileRef = useRef(null)
+  const [anchorEl, setAnchorEl] = useState(null)
+  const open = Boolean(anchorEl)
 
-  const headerStyles = {
-    backgroundColor: theme.primaryColor,
-    color: 'white',
-    padding: '1rem 2rem',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+  const handleProfileClick = (event) => {
+    setAnchorEl(event.currentTarget)
   }
 
-  const logoStyles = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-    textDecoration: 'none',
-    color: 'white'
-  }
-
-  const navStyles = {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center'
-  }
-
-  const buttonStyles = {
-    backgroundColor: 'transparent',
-    color: 'white',
-    border: '1px solid white',
-    padding: '0.5rem 1rem',
-    borderRadius: '4px',
-    textDecoration: 'none',
-    cursor: 'pointer',
-    fontSize: '0.9rem'
-  }
-
-  const profileStyles = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    cursor: 'pointer',
-    position: 'relative',
-    zIndex: 1001
-  }
-
-  const profilePicStyles = {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    border: '2px solid white'
-  }
-
-  const profileMenuStyles = {
-    position: 'absolute',
-    top: 'calc(100% + 0.5rem)',
-    right: '0',
-    backgroundColor: 'white',
-    border: '1px solid #ddd',
-    borderRadius: '8px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-    minWidth: '200px',
-    zIndex: 1002,
-    marginTop: '0'
-  }
-
-  const profileMenuItemStyles = {
-    padding: '0.75rem 1rem',
-    color: '#333',
-    textDecoration: 'none',
-    display: 'block',
-    borderBottom: '1px solid #eee',
-    cursor: 'pointer'
+  const handleMenuClose = () => {
+    setAnchorEl(null)
   }
 
   const handleProfilePictureUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file')
       return
     }
 
-    // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       alert('File size must be less than 5MB')
       return
@@ -109,7 +49,6 @@ const Header = () => {
     formData.append('profilePic', file)
 
     try {
-      console.log('Uploading profile picture...')
       const response = await fetch('/api/user/profile-pic', {
         method: 'POST',
         credentials: 'include',
@@ -117,220 +56,189 @@ const Header = () => {
       })
 
       if (response.ok) {
-        const result = await response.json()
-        console.log('Profile picture uploaded successfully:', result)
-        // Close the profile menu
-        setShowProfileMenu(false)
-        // Reload to show updated profile picture
+        handleMenuClose()
         window.location.reload()
       } else {
         const errorData = await response.json()
-        console.error('Profile picture upload failed:', errorData.error)
         alert('Failed to upload profile picture: ' + (errorData.error || 'Unknown error'))
       }
     } catch (error) {
-      console.error('Profile picture upload failed:', error)
       alert('Failed to upload profile picture: Network error')
     }
   }
 
-  const handleLogout = (e) => {
-    console.log('=== LOGOUT BUTTON CLICKED ===')
-    if (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-    setShowProfileMenu(false)
-    console.log('Redirecting to /logout...')
-    // Use window.location.replace to prevent back button
+  const handleLogout = () => {
+    handleMenuClose()
     window.location.replace('/logout')
   }
-
-  const handleEmergencyLogout = (e) => {
-    console.log('=== EMERGENCY LOGOUT BUTTON CLICKED ===')
-    if (e) {
-      e.preventDefault()
-      e.stopPropagation()
-    }
-    setShowProfileMenu(false)
-    console.log('Redirecting to /logout...')
-    // Use window.location.replace to prevent back button
-    window.location.replace('/logout')
-  }
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setShowProfileMenu(false)
-      }
-    }
-
-    if (showProfileMenu) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showProfileMenu])
 
   return (
-    <header style={headerStyles}>
-      <Link to="/" style={logoStyles}>
-        {theme.logo && (
-          <img 
-            src={theme.logo} 
-            alt={`${theme.organizationName} Logo`}
-            style={{ height: '40px', width: 'auto' }}
-          />
-        )}
-        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>
-          {theme.organizationName}
-        </h1>
-      </Link>
-      
-      <nav style={navStyles}>
-        <Link to="/" style={buttonStyles}>
-          Home
-        </Link>
-        
-        {isAuthenticated ? (
-          <>
-            {isAdmin && (
-              <Link to="/admin" style={buttonStyles}>
-                Admin Dashboard
-              </Link>
-            )}
-            <Link to="/checkin" style={buttonStyles}>
-              Check-In
-            </Link>
-            
-            {/* Direct Logout Button */}
-            <button 
-              onClick={() => window.location.href = '/logout'}
-              style={{
-                ...buttonStyles,
-                backgroundColor: '#DC2626',
-                borderColor: '#DC2626',
-                cursor: 'pointer'
-              }}
-            >
-              🚪 Logout
-            </button>
-            
-            {/* User Profile Section with Menu */}
-            <div style={{ position: 'relative' }}>
-              <div 
-                ref={profileRef}
-                style={profileStyles}
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
+    <AppBar 
+      position="static" 
+      sx={{ 
+        backgroundColor: theme.primaryColor,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+      }}
+    >
+      <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 4 } }}>
+        <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', gap: 2, textDecoration: 'none', color: 'inherit' }}>
+          {theme.logo && (
+            <Box
+              component="img"
+              src={theme.logo}
+              alt={`${theme.organizationName} Logo`}
+              sx={{ height: 40, width: 'auto' }}
+            />
+          )}
+          <Typography variant="h6" component="h1" sx={{ fontWeight: 700 }}>
+            {theme.organizationName}
+          </Typography>
+        </Box>
+
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Button 
+            component={Link} 
+            to="/" 
+            color="inherit"
+            sx={{ 
+              border: '1px solid rgba(255,255,255,0.5)',
+              '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' }
+            }}
+          >
+            Home
+          </Button>
+
+          {isAuthenticated ? (
+            <>
+              {isAdmin && (
+                <Button 
+                  component={Link} 
+                  to="/admin" 
+                  color="inherit"
+                  sx={{ 
+                    border: '1px solid rgba(255,255,255,0.5)',
+                    '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' }
+                  }}
+                >
+                  Admin Dashboard
+                </Button>
+              )}
+              <Button 
+                component={Link} 
+                to="/checkin" 
+                color="inherit"
+                sx={{ 
+                  border: '1px solid rgba(255,255,255,0.5)',
+                  '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' }
+                }}
               >
-                <div style={profilePicStyles}>
-                  {user?.profilePic ? (
-                    <img 
-                      src={user.profilePic} 
-                      alt="Profile" 
-                      style={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        borderRadius: '50%', 
-                        objectFit: 'cover' 
-                      }} 
-                    />
-                  ) : (
-                    user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'
-                  )}
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
+                Check-In
+              </Button>
+
+              <Button
+                onClick={handleLogout}
+                sx={{
+                  backgroundColor: '#DC2626',
+                  color: 'white',
+                  '&:hover': { backgroundColor: '#B91C1C' }
+                }}
+                startIcon={<Logout />}
+              >
+                Logout
+              </Button>
+
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <IconButton
+                  onClick={handleProfileClick}
+                  sx={{ p: 0 }}
+                >
+                  <Avatar
+                    src={user?.profilePic}
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: 'rgba(255,255,255,0.2)',
+                      border: '2px solid white',
+                      color: 'white',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {user?.profilePic 
+                      ? null 
+                      : (user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U')
+                    }
+                  </Avatar>
+                </IconButton>
+                <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'white' }}>
                     {user?.name || 'Admin User'}
-                  </div>
-                  <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', display: 'block' }}>
                     {user?.roles && user.roles.length > 0 
                       ? user.roles.map(role => role.replace('_', ' ').toUpperCase()).join(', ')
                       : user?.role?.replace('_', ' ').toUpperCase()
                     }
-                  </div>
-                </div>
-              </div>
+                  </Typography>
+                </Box>
+              </Box>
 
-              {/* Profile Menu */}
-              {showProfileMenu && (
-                <div style={profileMenuStyles}>
-                  <div style={{ ...profileMenuItemStyles, borderBottom: 'none', fontWeight: 'bold' }}>
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleMenuClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                PaperProps={{
+                  sx: { minWidth: 200, mt: 1 }
+                }}
+              >
+                <MenuItem disabled>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                     {user?.name || 'Admin User'}
-                  </div>
-                  <div style={{ ...profileMenuItemStyles, borderBottom: 'none', fontSize: '0.8rem', color: '#666' }}>
+                  </Typography>
+                </MenuItem>
+                <MenuItem disabled>
+                  <Typography variant="caption" color="text.secondary">
                     {user?.email}
-                  </div>
-                  <div style={{ borderTop: '1px solid #eee', margin: '0.5rem 0' }}></div>
-                  <label 
-                    style={profileMenuItemStyles}
-                    onMouseDown={(e) => {
-                      console.log('Change Profile Picture onMouseDown fired!')
-                      e.preventDefault()
-                      e.stopPropagation()
-                    }}
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                    }}
-                  >
-                    📷 Change Profile Picture
-                    <input
-                      type="file"
-                      accept="image/*"
-                      style={{ display: 'none' }}
-                      onChange={(e) => {
-                        console.log('File input onChange fired!')
-                        e.stopPropagation();
-                        handleProfilePictureUpload(e);
-                      }}
-                    />
-                  </label>
-                  <button 
-                    onMouseDown={(e) => {
-                      console.log('Logout button onMouseDown fired!')
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleLogout(e)
-                    }}
-                    onClick={(e) => {
-                      console.log('Logout button onClick fired!')
-                      e.preventDefault()
-                      e.stopPropagation()
-                    }}
-                    style={{ ...profileMenuItemStyles, width: '100%', textAlign: 'left', border: 'none', background: 'none' }}
-                  >
-                    🚪 Logout
-                  </button>
-                  <button 
-                    onMouseDown={(e) => {
-                      console.log('Emergency logout button onMouseDown fired!')
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleEmergencyLogout(e)
-                    }}
-                    onClick={(e) => {
-                      console.log('Emergency logout button onClick fired!')
-                      e.preventDefault()
-                      e.stopPropagation()
-                    }}
-                    style={{ ...profileMenuItemStyles, width: '100%', textAlign: 'left', border: 'none', background: 'none', color: '#DC2626', fontSize: '0.8rem' }}
-                  >
-                    🔴 Emergency Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          </>
-        ) : (
-          <Link to="/login" style={buttonStyles}>
-            Login
-          </Link>
-        )}
-      </nav>
-    </header>
+                  </Typography>
+                </MenuItem>
+                <Divider />
+                <MenuItem component="label">
+                  <PhotoCamera sx={{ mr: 1, fontSize: 20 }} />
+                  Change Profile Picture
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleProfilePictureUpload}
+                  />
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <Logout sx={{ mr: 1, fontSize: 20 }} />
+                  Logout
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                  <Typography variant="caption">Emergency Logout</Typography>
+                </MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Button 
+              component={Link} 
+              to="/login" 
+              color="inherit"
+              sx={{ 
+                border: '1px solid rgba(255,255,255,0.5)',
+                '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' }
+              }}
+            >
+              Login
+            </Button>
+          )}
+        </Stack>
+      </Toolbar>
+    </AppBar>
   )
 }
 
