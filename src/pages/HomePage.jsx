@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { keyframes } from '@emotion/react'
+import { styled } from '@mui/material/styles'
 import {
   Box,
   Grid,
@@ -18,6 +20,22 @@ import {
 import { ChatBubbleOutline, AutoAwesome } from '@mui/icons-material'
 import { useTheme } from '../contexts/ThemeContext'
 import AIRecommendations from '../components/AIRecommendations'
+
+const blinkAnimation = keyframes`
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.08);
+  }
+`
+
+const BlinkingTypography = styled(Typography)(({ theme }) => ({
+  animation: `${blinkAnimation} 1.5s ease-in-out infinite`,
+  display: 'inline-block'
+}))
 
 const HomePage = () => {
   const { theme } = useTheme()
@@ -147,17 +165,40 @@ const HomePage = () => {
           <Typography variant="h4" sx={{ color: theme.primaryColor, fontWeight: 700, mb: 1 }}>
             Available Appointment Slots
           </Typography>
-          <Typography variant="body1" sx={{ color: theme.textColor }}>
-            Book your appointment slot below. You can reserve for up to 5 people per booking.
-          </Typography>
+          {slots && slots.length > 0 ? (
+            <Typography variant="body1" sx={{ color: theme.textColor }}>
+              Book your appointment slot below. You can reserve for up to 5 people per booking.
+            </Typography>
+          ) : null}
         </Box>
 
-        {slots.length === 0 ? (
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ textAlign: 'center', color: theme.textColor }}>
+        {!slots || slots.length === 0 ? (
+          <Card sx={{ 
+            border: `2px solid ${theme.primaryColor}`,
+            backgroundColor: '#FFF7ED',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            py: 3,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <CardContent sx={{ 
+              textAlign: 'center',
+              width: '100%',
+              px: 3
+            }}>
+              <BlinkingTypography 
+                variant="h6" 
+                sx={{ 
+                  textAlign: 'center', 
+                  color: '#92400E',
+                  fontWeight: 700,
+                  width: '100%',
+                  display: 'block'
+                }}
+              >
                 No appointment slots available at this time. Please check back later.
-              </Typography>
+              </BlinkingTypography>
             </CardContent>
           </Card>
         ) : (
