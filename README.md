@@ -1,4 +1,4 @@
-# DarshanFlow - Appointment Management System
+# SmoothFlow - Appointment Management System
 
 A production-ready appointment, booking, and check‑in platform for organizations (temples, churches, venues). It includes a modern React frontend, an Express/Prisma backend, robust RBAC, timezone-aware slot management, cron jobs for auto-publish/auto-archive, and configurable organization settings.
 
